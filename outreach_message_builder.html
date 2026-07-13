@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Outreach Message Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --navy:#0f2d3d;
+    --blue:#1b6fa8;
+    --teal:#0f9b8e;
+    --bg:#f4f7f9;
+    --card:#ffffff;
+    --border:#d7e0e5;
+    --text:#1c2b33;
+    --muted:#5b6b73;
+    --tag-bg:#e7f1f7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:linear-gradient(135deg,var(--navy),var(--blue));
+    color:#fff;
+    padding:24px 32px;
+  }
+  header h1{margin:0 0 4px 0;font-size:22px;}
+  header p{margin:0;opacity:.85;font-size:14px;}
+  .wrap{
+    display:flex;
+    gap:24px;
+    padding:24px;
+    max-width:1400px;
+    margin:0 auto;
+    align-items:flex-start;
+  }
+  .col{flex:1;min-width:0;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  fieldset{
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin:0 0 18px 0;
+    padding:14px 16px 16px 16px;
+  }
+  legend{font-weight:600;color:var(--navy);padding:0 6px;font-size:14px;}
+  .field{margin-bottom:14px;}
+  label{
+    display:block;
+    font-weight:600;
+    font-size:13.5px;
+    margin-bottom:5px;
+    color:var(--navy);
+  }
+  .tag{
+    background:var(--tag-bg);
+    color:var(--blue);
+    font-size:10.5px;
+    font-weight:600;
+    padding:2px 7px;
+    border-radius:10px;
+    margin-left:6px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;}
+  input[type=text], textarea, select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fcfdfe;
+  }
+  textarea{resize:vertical;min-height:64px;}
+  .radio-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:2px;}
+  .radio-opt{display:flex;align-items:center;gap:6px;font-size:13.5px;}
+  .radio-opt input{width:auto;}
+  #outputPanel{position:sticky;top:24px;}
+  #promptText{
+    white-space:pre-wrap;
+    font-family:"SFMono-Regular",Consolas,Menlo,monospace;
+    font-size:12.5px;
+    background:#0f2d3d;
+    color:#dff1ec;
+    padding:16px;
+    border-radius:8px;
+    max-height:560px;
+    overflow-y:auto;
+    line-height:1.5;
+  }
+  .btn-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    padding:9px 16px;
+    font-size:13.5px;
+    font-weight:600;
+    font-family:inherit;
+  }
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:#0c8579;}
+  .btn-secondary{background:var(--tag-bg);color:var(--blue);}
+  .btn-secondary:hover{background:#d9e9f2;}
+  #placeholder{color:var(--muted);font-style:italic;font-size:13.5px;}
+  .banner{
+    background:#fff7e0;
+    border:1px solid #f0d98c;
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:12.5px;
+    color:#5b4a1a;
+    line-height:1.5;
+    margin-bottom:18px;
+  }
+  .banner b{color:#3d3113;}
+  .paired-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap;}
+  .paired-row input{flex:1;min-width:120px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;}
+  .paired-row button{background:#fbeaea;color:#b23b3b;border:none;border-radius:5px;padding:6px 10px;cursor:pointer;font-size:13px;flex:0 0 auto;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Outreach Message Builder</h1>
+  <p>Companion tool — turns your researched tracker rows into ready-to-send outreach messages, tailored per company.</p>
+</header>
+
+<div class="wrap">
+  <div class="col">
+
+    <div class="banner">
+      <b>Third tool in this family.</b> The Target Company Prompt Builder researches and ranks companies. The Job Posting Finder checks who's actively hiring. This one takes your shortlist — with its Key Contacts, Warm Introduction Path, and Category already researched — and drafts the actual messages, so you're not starting from a blank box.
+    </div>
+
+    <div class="card">
+      <fieldset>
+        <legend>1 · Paste from your tracker <span class="tag">optional</span></legend>
+        <div class="field">
+          <label>Bulk paste — Company, Key Contacts, Warm Introduction Path, Category</label>
+          <textarea id="bulkPaste" placeholder="In Excel, Ctrl+click to select these 4 columns in this order (they aren't adjacent in the tracker): Company, Key Contacts / Priority Titles, Warm Introduction Path, Category. Copy, then paste here — one row per line."></textarea>
+          <p class="hint">Ctrl+click (or Cmd+click on Mac) lets you select non-adjacent columns in Excel and copy them together, tab-separated, in the order you clicked. That's what this box expects: Company, then Key Contacts, then Warm Introduction Path, then Category.</p>
+          <button class="btn-secondary" id="parseBulkBtn" type="button" style="margin-top:8px;">Parse rows</button>
+        </div>
+        <div class="field" id="pairedPreviewField" style="display:none;">
+          <label>Parsed rows — check these before generating your prompt</label>
+          <div id="pairedPreview"></div>
+          <button class="btn-secondary" id="addPairBtn" type="button" style="margin-top:8px;">+ Add row manually</button>
+          <p class="hint">No paste at all? Click above to build a row from scratch — company, contact, warm intro path, and category, one at a time.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · Message settings</legend>
+
+        <div class="field">
+          <label>Channel</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="channel" value="linkedin_connect" checked> LinkedIn connection request</label>
+            <label class="radio-opt"><input type="radio" name="channel" value="linkedin_message"> LinkedIn InMail / message</label>
+            <label class="radio-opt"><input type="radio" name="channel" value="email"> Email</label>
+          </div>
+          <p class="hint">LinkedIn connection requests have a strict ~300-character limit — the generated prompt enforces this automatically when selected.</p>
+        </div>
+
+        <div class="field">
+          <label>Tone</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="tone" value="warm" checked> Warm / casual</label>
+            <label class="radio-opt"><input type="radio" name="tone" value="formal"> Formal / executive</label>
+            <label class="radio-opt"><input type="radio" name="tone" value="direct"> Direct / concise</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Your background <span class="tag">optional</span></label>
+          <textarea id="background" placeholder="Paste resume, CV, bio, or a few lines of relevant experience — grounds the message in something real instead of generic language. E.g. '8 years in federal OT cybersecurity consulting, former Booz Allen and SAIC'"></textarea>
+          <p class="hint">Same field as the other tools in this family — reused here so messages reference your actual background where relevant, not filler.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Output</legend>
+        <div class="field">
+          <label>Output format</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="outputFormat" value="table" checked> Table in chat</label>
+            <label class="radio-opt"><input type="radio" name="outputFormat" value="docx"> Downloadable Word document</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="banner">
+        <b>Why the reasoning is always shown:</b> for every company, the output explains which approach it picked and why — e.g. "leans on shared history since Warm Introduction Path names a former colleague" vs. "opens with relevance since there's no existing connection." This isn't optional — it's how you catch it if the tool read a Warm Introduction Path wrong, before you send anything.
+      </div>
+      <div class="banner">
+        <b>Grounding guardrail:</b> the generated prompt explicitly tells Claude not to invent shared history, mutual connections, or personal details that weren't actually provided — every message stays grounded in your real background and the tracker's actual research, even if that means a more generic (but honest) opening for a cold company.
+      </div>
+    </div>
+  </div>
+
+  <div class="col" id="outputPanel">
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn-primary" id="copyBtn">Copy prompt</button>
+        <button class="btn-secondary" id="downloadBtn">Download .txt</button>
+      </div>
+      <div id="promptText"><span id="placeholder">Paste and parse at least one row, or add one manually, to see your prompt appear here.</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const promptTextEl = document.getElementById('promptText');
+let pairedRows = [];
+
+function val(id){ return document.getElementById(id).value.trim(); }
+function radioVal(name){
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
+}
+
+function parseBulkPaste(){
+  const raw = document.getElementById('bulkPaste').value;
+  if(!raw.trim()) return;
+  const lines = raw.split(/\n/).map(l => l.trim()).filter(Boolean);
+  lines.forEach(line => {
+    const cells = line.split('\t').map(c => c.trim());
+    if(!cells[0]) return;
+    if(cells[0].toLowerCase() === 'company') return; // skip an obvious header row
+    pairedRows.push({
+      company: cells[0] || '',
+      contact: cells[1] || '',
+      warmIntro: cells[2] || '',
+      category: cells[3] || '',
+    });
+  });
+  document.getElementById('bulkPaste').value = '';
+  renderPairedPreview();
+  render();
+}
+
+function renderPairedPreview(){
+  const container = document.getElementById('pairedPreview');
+  const field = document.getElementById('pairedPreviewField');
+  if(pairedRows.length === 0){
+    field.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  field.style.display = 'block';
+  container.innerHTML = '';
+  pairedRows.forEach((row, idx) => {
+    const div = document.createElement('div');
+    div.className = 'paired-row';
+    div.innerHTML = `
+      <input type="text" data-idx="${idx}" data-field="company" value="${row.company.replace(/"/g,'&quot;')}" placeholder="Company">
+      <input type="text" data-idx="${idx}" data-field="contact" value="${row.contact.replace(/"/g,'&quot;')}" placeholder="Key Contacts">
+      <input type="text" data-idx="${idx}" data-field="warmIntro" value="${row.warmIntro.replace(/"/g,'&quot;')}" placeholder="Warm Introduction Path">
+      <input type="text" data-idx="${idx}" data-field="category" value="${row.category.replace(/"/g,'&quot;')}" placeholder="Category">
+      <button type="button" data-remove="${idx}">\u00d7</button>
+    `;
+    container.appendChild(div);
+  });
+  container.querySelectorAll('input').forEach(el => {
+    el.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      pairedRows[idx][field] = e.target.value;
+      render();
+    });
+  });
+  container.querySelectorAll('button[data-remove]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.remove);
+      pairedRows.splice(idx, 1);
+      renderPairedPreview();
+      render();
+    });
+  });
+}
+
+document.getElementById('parseBulkBtn').addEventListener('click', parseBulkPaste);
+document.getElementById('addPairBtn').addEventListener('click', () => {
+  pairedRows.push({ company: '', contact: '', warmIntro: '', category: '' });
+  renderPairedPreview();
+});
+
+function channelLabel(v){
+  if(v === 'linkedin_connect') return 'LinkedIn connection request (strict ~300-character limit, including spaces)';
+  if(v === 'linkedin_message') return 'LinkedIn InMail / direct message (no strict length limit, but keep it scannable — a few short paragraphs at most)';
+  return 'Email (can carry more context than LinkedIn, but should still open with a clear, specific first line)';
+}
+function toneLabel(v){
+  if(v === 'formal') return 'Formal / executive — polished, respectful of seniority, no slang';
+  if(v === 'direct') return 'Direct / concise — get to the point fast, minimal preamble';
+  return 'Warm / casual — conversational, personable, still professional';
+}
+
+function buildPrompt(){
+  const background = val('background');
+  const channel = radioVal('channel');
+  const tone = radioVal('tone');
+  const outputFormat = radioVal('outputFormat');
+  const rows = pairedRows.filter(r => r.company);
+
+  if(rows.length === 0){
+    return null;
+  }
+
+  let lines = [];
+  lines.push(`I want you to draft outreach messages for the companies below, using research I've already done — not generic templates.`);
+  lines.push("");
+  lines.push(`- Channel: ${channelLabel(channel)}`);
+  lines.push(`- Tone: ${toneLabel(tone)}`);
+  if(background) lines.push(`- My background (use this to ground the message in something real — former employers, relevant experience, credentials — rather than generic language): ${background}`);
+  lines.push("");
+  lines.push(`Companies, with what I've already researched about each:`);
+  rows.forEach(r => {
+    lines.push(`- ${r.company}`);
+    if(r.contact) lines.push(`    Key Contact / Priority Title: ${r.contact}`);
+    if(r.warmIntro) lines.push(`    Warm Introduction Path: ${r.warmIntro}`);
+    if(r.category) lines.push(`    Category: ${r.category}`);
+  });
+
+  lines.push("");
+  lines.push(`For each company, do the following:`);
+  lines.push(`1. Write 2-3 message variants appropriate for the channel and tone above, each one shaped by that specific company's Warm Introduction Path — don't write one generic message and swap in the company name. A company with a direct/former-colleague path should read differently from one where the path is a cold recruiter or executive search introduction.`);
+  lines.push(`2. After the variants, add one line of visible reasoning explaining which approach you took and why, referencing that company's specific Warm Introduction Path — e.g. "Leans on shared history directly since this is a former-colleague connection" vs. "Opens with relevance rather than a relationship, since there's no existing connection to draw on." This is not optional — always include it, so I can catch it if a Warm Introduction Path got misread before I send anything.`);
+  lines.push("");
+  lines.push(`CRITICAL — grounding guardrail: do not invent specific shared history, mutual connections, named colleagues, or personal details that weren't actually provided in the Warm Introduction Path or my background above. If a Warm Introduction Path is vague (e.g. just "recruiter" or "executive search firm"), keep the message appropriately general rather than fabricating false specifics to sound more personal. A message that's honestly generic is fine. A message that fabricates a relationship is not.`);
+  if(channel === 'linkedin_connect'){
+    lines.push(`Strictly enforce LinkedIn's ~300-character connection request limit (including spaces) on every variant for this channel — count characters, don't estimate.`);
+  }
+
+  lines.push("");
+  if(outputFormat === 'docx'){
+    lines.push(`Format the result as a downloadable Word document (.docx) — one heading per company, each variant clearly labeled underneath it, and the reasoning line set off in italics so it's visually distinct from the message text itself.`);
+  } else {
+    lines.push(`Present the result directly in your response — one section per company, each variant clearly labeled, with the reasoning line set off from the message text (e.g. in italics or a blockquote) so it's easy to distinguish your notes from the actual message.`);
+  }
+
+  return lines.join("\n");
+}
+
+function render(){
+  const prompt = buildPrompt();
+  if(prompt === null){
+    promptTextEl.innerHTML = '<span id="placeholder">Paste and parse at least one row, or add one manually, to see your prompt appear here.</span>';
+  } else {
+    promptTextEl.textContent = prompt;
+  }
+}
+
+document.querySelectorAll('input, textarea').forEach(el => {
+  el.addEventListener('input', render);
+  el.addEventListener('change', render);
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const prompt = buildPrompt();
+  if(!prompt) return;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    alert('Clipboard blocked by your browser — use the Download .txt button instead.');
+  });
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const prompt = buildPrompt();
+  if(!prompt) return;
+  const blob = new Blob([prompt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'outreach_message_builder_prompt.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+render();
+</script>
+</body>
+</html>
