@@ -39,11 +39,11 @@ The tracker's relevant columns — Company, Key Contacts / Priority Titles, Warm
 3. Copy (**Ctrl/Cmd+C**) — Excel copies multi-selected non-adjacent columns together, tab-separated, in the order you clicked them.
 4. Paste into the **Bulk paste** box.
 5. Click **Parse rows**.
-6. Check the parsed list that appears — every field is editable inline, and any row can be removed with the **×** button.
+6. Check the parsed list that appears — every field is editable inline, and any row can be removed with the **×** button. A fifth field, **Target Audience**, appears as a dropdown next to each row — this isn't part of the bulk paste itself (it's not one of your tracker's columns), so set it manually per row after parsing if you want it.
 
 ### Adding rows manually
 
-No paste at all? Click **+ Add row manually** to build a row from scratch — four fields, one row at a time.
+No paste at all? Click **+ Add row manually** to build a row from scratch — company, contact, warm intro path, category, and target audience, one at a time.
 
 ---
 
@@ -51,13 +51,23 @@ No paste at all? Click **+ Add row manually** to build a row from scratch — fo
 
 | Field | What it does |
 |---|---|
-| **Channel** | LinkedIn connection request, LinkedIn InMail/message, or Email. LinkedIn connection requests get a strict ~300-character limit enforced automatically in the generated prompt — Claude is told to count characters, not estimate. |
+| **Channel** | LinkedIn connection request, LinkedIn InMail/message, or Email. LinkedIn connection requests get a strict ~300-character limit enforced automatically in the generated prompt — Claude is told to count characters, not estimate. **Email** additionally requires a specific Subject line for every variant, tied to the actual company/role/connection point — not a generic "Reaching out." |
 | **Tone** | Warm/casual, Formal/executive, or Direct/concise. |
 | **Your background** | Optional, same field as the other two tools — paste resume, CV, bio, or a few lines of relevant experience. Grounds the message in something real rather than generic filler. |
 
 ---
 
-## 4. Why Every Company Gets a Different Message
+## 4. Target Audience (Per Row, Optional)
+
+Each parsed or manually-added row gets a **Target Audience** dropdown: *(auto-detect)*, **Recruiter**, **Hiring Manager**, **Cold Outreach**, or **Warm Outreach (referral / existing connection)**.
+
+This is a separate dimension from Warm Introduction Path, not a replacement for it. Warm Introduction Path carries the specific narrative detail (e.g. "former colleague, John Smith, now at this company"). Target Audience gives Claude an explicit, structured signal about *who* the message is going to and *how* it should be framed — a Recruiter is typically screening for fit across many roles, while a Hiring Manager cares more about the specific team and work; Cold Outreach has to establish relevance from scratch, while Warm Outreach can lean on an existing connection.
+
+Leave it on *(auto-detect)* and Claude infers the closest fit from Warm Introduction Path instead — this field is there for when you want to be explicit rather than leave it to inference.
+
+---
+
+## 5. Why Every Company Gets a Different Message
 
 The core design principle of this tool: **the same Warm Introduction Path value should produce a structurally different message, not just a name swap.** A company where Warm Introduction Path says "direct — former colleagues" should read differently from one where it says "no direct connection — executive search firm." The first can lean on real shared history; the second has to establish relevance without pretending a relationship exists.
 
@@ -65,7 +75,7 @@ This is why the bulk-paste columns matter — without Warm Introduction Path and
 
 ---
 
-## 5. The Reasoning Line (Not Optional)
+## 6. The Reasoning Line (Not Optional)
 
 For every company, the output includes one line of visible reasoning explaining which approach was taken and why — e.g. *"Leans on shared history directly since this is a former-colleague connection"* or *"Opens with relevance rather than a relationship, since there's no existing connection to draw on."*
 
@@ -73,7 +83,7 @@ This is deliberately not something you can turn off. It's how you catch it if a 
 
 ---
 
-## 6. The Grounding Guardrail
+## 7. The Grounding Guardrail
 
 Same honesty philosophy as the rest of this toolkit, adapted to a different kind of risk. The other tools guard against fabricated *data* (a job posting that doesn't exist, a company statistic that was never verified). This tool guards against fabricated *relationships* — the generated prompt explicitly tells Claude not to invent shared history, mutual connections, or personal specifics that weren't actually provided.
 
@@ -81,14 +91,14 @@ If your Warm Introduction Path for a company is just "recruiter" or "executive s
 
 ---
 
-## 7. Output Format
+## 8. Output Format
 
 - **Table in chat** (default) — one section per company, each message variant labeled, with the reasoning line visually set apart (italics or a blockquote) from the message text itself.
 - **Downloadable Word document** — same structure, formatted as a `.docx` with a heading per company.
 
 ---
 
-## 8. Typical Workflow, Start to Finish
+## 9. Typical Workflow, Start to Finish
 
 1. Run the Target Company Prompt Builder first; get your tracker with Key Contacts, Warm Introduction Path, and Category filled in.
 2. Ctrl+click the four relevant columns in your tracker, copy, and paste into this tool's bulk-paste box.
@@ -99,12 +109,14 @@ If your Warm Introduction Path for a company is just "recruiter" or "executive s
 
 ---
 
-## 9. Quick Troubleshooting
+## 10. Quick Troubleshooting
 
 | Problem | Fix |
 |---|---|
 | Bulk paste didn't split into 4 clean fields | You likely copied adjacent columns instead of Ctrl+clicking the four specific ones — re-select using Ctrl+click in the exact order: Company, Key Contacts, Warm Introduction Path, Category. |
-| A parsed row looks wrong | Edit any field directly in the preview list — all four are editable inline. |
+| A parsed row looks wrong | Edit any field directly in the preview list — Company, Key Contacts, Warm Introduction Path, and Category are all editable inline; Target Audience is a dropdown next to them. |
 | Prompt panel just shows placeholder text | You need at least one parsed or manually added row with a Company filled in. |
-| Messages feel generic | Check whether Warm Introduction Path and Category actually came through in the paste — a blank Warm Introduction Path gives Claude nothing to differentiate on. |
+| Messages feel generic | Check whether Warm Introduction Path and Category actually came through in the paste — a blank Warm Introduction Path gives Claude nothing to differentiate on. Setting Target Audience explicitly per row can also sharpen this. |
 | LinkedIn connection request feels cut off | That's the ~300-character limit being enforced — try Formal/Direct tone, which tends to fit more information per character than Warm/casual phrasing. |
+| Email output doesn't have a Subject line | This should be automatic when Channel is set to Email — if it's missing, ask Claude directly to add a specific Subject line above each message body. |
+| In ChatGPT (or another tool), it asks clarifying questions instead of just running the task | The generated prompt now opens with an explicit "execute this directly, don't ask clarifying questions" instruction specifically to head this off — if it still happens, you can restate that instruction even more bluntly as a follow-up message. |

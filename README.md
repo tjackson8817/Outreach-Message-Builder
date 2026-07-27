@@ -35,12 +35,15 @@ See `Outreach_Message_Builder_User_Guide.md` for the full walkthrough.
 
 ## What makes this different from a generic message template
 
-Two things, both non-optional in the generated prompt:
+Three things, all non-optional in the generated prompt:
 
-- **A visible reasoning line for every company**, explaining which approach was taken and why, tied to that company's specific Warm Introduction Path — so you can catch it if a connection type got misread before you send anything.
+- **A visible reasoning line for every company**, explaining which approach was taken and why, tied to that company's specific Warm Introduction Path (and Target Audience, if set) — so you can catch it if a connection type got misread before you send anything.
 - **A grounding guardrail against fabricated relationships.** If a company's Warm Introduction Path is vague (e.g. just "recruiter"), the message stays honestly general rather than inventing false shared history to sound warmer. A generic-but-honest message is the correct output in that case, not a flaw.
+- **An optional per-row Target Audience** (Recruiter, Hiring Manager, Cold Outreach, or Warm Outreach) that further shapes each message's framing — a Recruiter message reads differently from a Hiring Manager message, independent of the Warm Introduction Path.
 
 ## Notes
 
 - This repo can be public or private — GitHub Pages on the free tier requires a public repo (or a paid plan for private-repo Pages).
 - Unlike the other two tools in this family, this one doesn't strictly require the Web search capability in Claude — it drafts from research you already provide, not a live lookup.
+- Choosing Email as the channel automatically requires a specific Subject line for every drafted variant, not a generic one.
+- The generated prompt opens with an explicit "execute this directly, don't ask clarifying questions" instruction, aimed at other AI tools (e.g. ChatGPT) that sometimes respond with questions instead of just running the task.
