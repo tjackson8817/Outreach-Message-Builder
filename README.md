@@ -19,15 +19,17 @@ This tool takes a shortlist from that research — with Key Contacts, Warm Intro
 | File | What it is |
 |---|---|
 | `outreach_message_builder.html` | The interactive tool. Open it directly in any browser, or use the GitHub Pages link above. |
-| `Outreach_Message_Builder_User_Guide.md` | Full usage guide — bulk-paste setup, message settings, and why the reasoning line is never optional. |
+| `Outreach_Message_Builder_User_Guide.md` | Full usage guide — bulk-paste setup, message settings, Message Goal & Context Notes, and why the reasoning line is never optional. |
 | `Outreach_Message_Builder_User_Guide.docx` | Same guide, as a Word document. |
+| `Outreach_Message_Builder_User_Guide.doc` | Same guide again, in the legacy Word 97 format, for tooling that doesn't read `.docx`. |
+| `Example_Outreach_Messages.docx` | Real sample output — four companies, showing how the tool differentiates by connection type, audience, and message goal (first outreach, follow-up, and thank-you). |
 
 ## Quick start
 
 1. Open `outreach_message_builder.html` (via GitHub Pages, or download and double-click it).
 2. In your tracker, Ctrl+click (Cmd+click on Mac) the Company, Key Contacts / Priority Titles, Warm Introduction Path, and Category column headers, in that order, then copy.
 3. Paste into the tool's bulk-paste box and click **Parse rows**.
-4. Set your channel (LinkedIn connection request, LinkedIn message, or Email) and tone.
+4. Set your Message Goal (First outreach, Follow-up, Thank-you, or Staying in touch) — anything other than First outreach adds a per-row Context Notes field to fill in. Set your channel (LinkedIn connection request, LinkedIn message, or Email) and tone.
 5. Copy the generated prompt and paste it into a new Claude chat.
 6. Review every message *and* its reasoning line before sending anything — this tool drafts, it doesn't send.
 
@@ -40,6 +42,8 @@ Three things, all non-optional in the generated prompt:
 - **A visible reasoning line for every company**, explaining which approach was taken and why, tied to that company's specific Warm Introduction Path (and Target Audience, if set) — so you can catch it if a connection type got misread before you send anything.
 - **A grounding guardrail against fabricated relationships.** If a company's Warm Introduction Path is vague (e.g. just "recruiter"), the message stays honestly general rather than inventing false shared history to sound warmer. A generic-but-honest message is the correct output in that case, not a flaw.
 - **An optional per-row Target Audience** (Recruiter, Hiring Manager, Cold Outreach, or Warm Outreach) that further shapes each message's framing — a Recruiter message reads differently from a Hiring Manager message, independent of the Warm Introduction Path.
+
+- **A Message Goal that changes the actual instructions, not just the wording.** First outreach, Follow-up (no response yet), Thank-you (after a call/interview), or Staying in touch each produce structurally different messages — a follow-up won't repeat your first pitch, a thank-you references what was actually discussed (via a per-row Context Notes field), and staying-in-touch carries no disguised ask. The same grounding guardrail applies to Context Notes as to Warm Introduction Path: thin or missing notes produce an honestly general message, never invented specifics.
 
 ## Notes
 
