@@ -134,7 +134,7 @@
 
 <header>
   <h1>Outreach Message Builder</h1>
-  <p>Companion tool — turns your researched tracker rows into ready-to-send outreach messages, tailored per company.</p>
+  <p>Companion tool — turns your researched tracker rows into ready-to-send outreach messages, tailored per company and per stage (first outreach, follow-up, thank-you, or staying in touch).</p>
 </header>
 
 <div class="wrap">
@@ -163,6 +163,17 @@
 
       <fieldset>
         <legend>2 · Message settings</legend>
+
+        <div class="field">
+          <label>Message goal</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="goal" value="first" checked> First outreach</label>
+            <label class="radio-opt"><input type="radio" name="goal" value="followup"> Follow-up (no response yet)</label>
+            <label class="radio-opt"><input type="radio" name="goal" value="thankyou"> Thank-you (after a call/interview)</label>
+            <label class="radio-opt"><input type="radio" name="goal" value="staying_in_touch"> Staying in touch</label>
+          </div>
+          <p class="hint">Each goal gets different instructions, not just a reworded version of the same message — a follow-up shouldn't repeat your first pitch, a thank-you needs to reference something real that was actually discussed, and staying-in-touch shouldn't read like a disguised pitch. Choosing anything other than "First outreach" adds a Context Notes field to each row below.</p>
+        </div>
 
         <div class="field">
           <label>Channel</label>
@@ -245,6 +256,7 @@ function parseBulkPaste(){
       warmIntro: cells[2] || '',
       category: cells[3] || '',
       audience: '',
+      contextNotes: '',
     });
   });
   document.getElementById('bulkPaste').value = '';
@@ -260,6 +272,22 @@ const AUDIENCE_OPTIONS = [
   { value: 'warm', label: 'Warm Outreach (referral / existing connection)' },
 ];
 
+function contextFieldMeta(goal){
+  if(goal === 'followup') return {
+    label: 'Context Notes — when you first reached out, and anything new to add',
+    placeholder: 'e.g. "Sent a LinkedIn connection request Aug 1, no response yet" or "Applied to the OT Security Lead posting Jul 28"'
+  };
+  if(goal === 'thankyou') return {
+    label: 'Context Notes — what you actually discussed (be specific, this grounds the message)',
+    placeholder: 'e.g. "45-min call Aug 5 with Jane Doe, discussed their OT team\'s 2027 hiring plans and Q4 budget approval timeline"'
+  };
+  if(goal === 'staying_in_touch') return {
+    label: 'Context Notes — reason for reaching out now (optional)',
+    placeholder: 'e.g. "Saw their Series C funding news" — leave blank for a generic, low-pressure check-in'
+  };
+  return null; // 'first' goal: no context field shown
+}
+
 function renderPairedPreview(){
   const container = document.getElementById('pairedPreview');
   const field = document.getElementById('pairedPreviewField');
@@ -270,12 +298,24 @@ function renderPairedPreview(){
   }
   field.style.display = 'block';
   container.innerHTML = '';
+  const goal = radioVal('goal');
+  const ctxMeta = contextFieldMeta(goal);
+  if(ctxMeta){
+    const label = document.createElement('p');
+    label.className = 'hint';
+    label.style.marginTop = '0';
+    label.textContent = ctxMeta.label;
+    container.appendChild(label);
+  }
   pairedRows.forEach((row, idx) => {
     const div = document.createElement('div');
     div.className = 'paired-row';
     const audienceOptionsHtml = AUDIENCE_OPTIONS.map(opt =>
       `<option value="${opt.value}" ${row.audience === opt.value ? 'selected' : ''}>${opt.label}</option>`
     ).join('');
+    const contextInputHtml = ctxMeta
+      ? `<input type="text" data-idx="${idx}" data-field="contextNotes" value="${(row.contextNotes||'').replace(/"/g,'&quot;')}" placeholder="${ctxMeta.placeholder.replace(/"/g,'&quot;')}" style="flex-basis:100%;margin-top:4px;">`
+      : '';
     div.innerHTML = `
       <input type="text" data-idx="${idx}" data-field="company" value="${row.company.replace(/"/g,'&quot;')}" placeholder="Company">
       <input type="text" data-idx="${idx}" data-field="contact" value="${row.contact.replace(/"/g,'&quot;')}" placeholder="Key Contacts">
@@ -283,6 +323,7 @@ function renderPairedPreview(){
       <input type="text" data-idx="${idx}" data-field="category" value="${row.category.replace(/"/g,'&quot;')}" placeholder="Category">
       <select data-idx="${idx}" data-field="audience" style="flex:1.3;min-width:150px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;">${audienceOptionsHtml}</select>
       <button type="button" data-remove="${idx}">\u00d7</button>
+      ${contextInputHtml}
     `;
     container.appendChild(div);
   });
@@ -314,7 +355,7 @@ function renderPairedPreview(){
 
 document.getElementById('parseBulkBtn').addEventListener('click', parseBulkPaste);
 document.getElementById('addPairBtn').addEventListener('click', () => {
-  pairedRows.push({ company: '', contact: '', warmIntro: '', category: '', audience: '' });
+  pairedRows.push({ company: '', contact: '', warmIntro: '', category: '', audience: '', contextNotes: '' });
   renderPairedPreview();
 });
 
@@ -324,6 +365,13 @@ function audienceLabel(v){
   if(v === 'cold') return 'Cold Outreach';
   if(v === 'warm') return 'Warm Outreach (referral / existing connection)';
   return '';
+}
+
+function goalLabel(v){
+  if(v === 'followup') return 'Follow-up — I already sent a first message and haven\'t heard back';
+  if(v === 'thankyou') return 'Thank-you — following up after an actual call or interview';
+  if(v === 'staying_in_touch') return 'Staying in touch — no ask, just keeping the relationship warm';
+  return 'First outreach — this is the first message to this contact';
 }
 
 function channelLabel(v){
@@ -339,6 +387,7 @@ function toneLabel(v){
 
 function buildPrompt(){
   const background = val('background');
+  const goal = radioVal('goal');
   const channel = radioVal('channel');
   const tone = radioVal('tone');
   const outputFormat = radioVal('outputFormat');
@@ -353,6 +402,7 @@ function buildPrompt(){
   lines.push("");
   lines.push(`I want you to draft outreach messages for the companies below, using research I've already done — not generic templates.`);
   lines.push("");
+  lines.push(`- Message goal: ${goalLabel(goal)}`);
   lines.push(`- Channel: ${channelLabel(channel)}`);
   lines.push(`- Tone: ${toneLabel(tone)}`);
   if(background) lines.push(`- My background (use this to ground the message in something real — former employers, relevant experience, credentials — rather than generic language): ${background}`);
@@ -364,18 +414,29 @@ function buildPrompt(){
     if(r.warmIntro) lines.push(`    Warm Introduction Path: ${r.warmIntro}`);
     if(r.category) lines.push(`    Category: ${r.category}`);
     if(r.audience) lines.push(`    Target Audience: ${audienceLabel(r.audience)}`);
+    if(r.contextNotes) lines.push(`    Context Notes: ${r.contextNotes}`);
   });
 
   lines.push("");
   lines.push(`For each company, do the following:`);
-  lines.push(`1. Write 2-3 message variants appropriate for the channel and tone above, each one shaped by that specific company's Warm Introduction Path and Target Audience (where given) — don't write one generic message and swap in the company name. A company with a direct/former-colleague path should read differently from one where the path is a cold recruiter or executive search introduction. If Target Audience is given, let it further shape the message context specifically: a "Recruiter" audience should read differently from a "Hiring Manager" audience (a recruiter is typically screening for fit across many roles; a hiring manager cares more about the specific team and work), and "Cold Outreach" vs. "Warm Outreach (referral / existing connection)" should differ in how much the message can lean on an existing relationship versus needing to establish relevance from scratch. If Target Audience isn't given for a company, infer the closest fit from its Warm Introduction Path instead.`);
-  lines.push(`2. After the variants, add one line of visible reasoning explaining which approach you took and why, referencing that company's specific Warm Introduction Path (and Target Audience, if given) — e.g. "Leans on shared history directly since this is a former-colleague connection" vs. "Opens with relevance rather than a relationship, since there's no existing connection to draw on." This is not optional — always include it, so I can catch it if a Warm Introduction Path or Target Audience got misread before I send anything.`);
+
+  if(goal === 'followup'){
+    lines.push(`1. Write 2-3 follow-up message variants appropriate for the channel and tone above. This is NOT a first message — do not re-introduce yourself at length or repeat the full original pitch. Acknowledge briefly that you reached out before (using that company's Context Notes if given, e.g. what you sent and when) without sounding anxious, apologetic, or guilt-tripping about the lack of response. If Context Notes mentions something new since the first message (a new posting, news about the company, a relevant update on your end), lead with that as the actual reason to reconnect — a follow-up with a genuine new angle reads very differently from a bare "just checking in." If no new angle is given, keep it brief and low-pressure rather than inventing one. Keep these noticeably shorter than a first-touch message.`);
+  } else if(goal === 'thankyou'){
+    lines.push(`1. Write 2-3 thank-you message variants appropriate for the channel and tone above, for AFTER an actual call or interview already happened. Reference the specific things discussed, using that company's Context Notes — do not write a generic "thank you for your time" with no substance. If Context Notes is thin or missing for a company, keep the message honestly general (a warm, genuine thank-you without invented specifics) rather than fabricating details about what was supposedly discussed. Reinforce genuine interest and, if Context Notes mentions an agreed next step (they said they'd follow up, a timeline was mentioned, etc.), reference it naturally rather than ignoring it.`);
+  } else if(goal === 'staying_in_touch'){
+    lines.push(`1. Write 2-3 "staying in touch" message variants appropriate for the channel and tone above — low-pressure, no explicit ask, not a disguised pitch. If Context Notes gives a real reason for reaching out now (news, a shared connection, something relevant to them), use it as the actual hook for the message. If Context Notes is blank, keep it a genuine, low-key check-in rather than manufacturing a reason. These should read like something a real person would send to maintain a relationship, not like outreach with the sales stripped out.`);
+  } else {
+    lines.push(`1. Write 2-3 message variants appropriate for the channel and tone above, each one shaped by that specific company's Warm Introduction Path and Target Audience (where given) — don't write one generic message and swap in the company name. A company with a direct/former-colleague path should read differently from one where the path is a cold recruiter or executive search introduction. If Target Audience is given, let it further shape the message context specifically: a "Recruiter" audience should read differently from a "Hiring Manager" audience (a recruiter is typically screening for fit across many roles; a hiring manager cares more about the specific team and work), and "Cold Outreach" vs. "Warm Outreach (referral / existing connection)" should differ in how much the message can lean on an existing relationship versus needing to establish relevance from scratch. If Target Audience isn't given for a company, infer the closest fit from its Warm Introduction Path instead.`);
+  }
+
+  lines.push(`2. After the variants, add one line of visible reasoning explaining which approach you took and why, referencing that company's specific Warm Introduction Path and/or Context Notes (whichever applies to the goal above) — e.g. "Leans on shared history directly since this is a former-colleague connection" or "References the Q4 budget timeline mentioned on the call rather than a generic thank-you." This is not optional — always include it, so I can catch it if something got misread before I send anything.`);
   if(channel === 'email'){
     lines.push(`3. For every variant, include a specific Subject line above the message body — not generic ("Reaching out" or similar), but tied to the actual company, role, or connection point for that message. Label it clearly as "Subject:" so it's obvious which line is the subject versus the body.`);
   }
 
   lines.push("");
-  lines.push(`CRITICAL — grounding guardrail: do not invent specific shared history, mutual connections, named colleagues, or personal details that weren't actually provided in the Warm Introduction Path, Target Audience, or my background above. If a Warm Introduction Path is vague (e.g. just "recruiter" or "executive search firm"), keep the message appropriately general rather than fabricating false specifics to sound more personal. A message that's honestly generic is fine. A message that fabricates a relationship is not.`);
+  lines.push(`CRITICAL — grounding guardrail: do not invent specific shared history, mutual connections, named colleagues, prior discussion topics, or personal details that weren't actually provided in the Warm Introduction Path, Target Audience, Context Notes, or my background above. If a Warm Introduction Path is vague (e.g. just "recruiter" or "executive search firm"), or Context Notes is thin or missing for a follow-up/thank-you/staying-in-touch message, keep the message appropriately general rather than fabricating false specifics to sound more personal or more informed than you actually are. A message that's honestly generic is fine. A message that fabricates a relationship, a conversation, or a detail is not.`);
   if(channel === 'linkedin_connect'){
     lines.push(`Strictly enforce LinkedIn's ~300-character connection request limit (including spaces) on every variant for this channel — count characters, don't estimate.`);
   }
@@ -402,6 +463,9 @@ function render(){
 document.querySelectorAll('input, textarea').forEach(el => {
   el.addEventListener('input', render);
   el.addEventListener('change', render);
+});
+document.querySelectorAll('input[name="goal"]').forEach(el => {
+  el.addEventListener('change', renderPairedPreview);
 });
 
 document.getElementById('copyBtn').addEventListener('click', () => {
