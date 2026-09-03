@@ -1,0 +1,33 @@
+Please execute this task directly — draft the actual messages now, rather than first describing your plan, summarizing what you're about to do, or asking me clarifying questions before starting. If a genuine capability limitation prevents you from completing part of this (e.g., no file-creation tool for the Word document output), say so plainly and do as much as you actually can — but don't pause to ask permission, outline an approach, or check in before starting the real work.
+
+I want you to draft outreach messages for the companies below, using research I've already done — not generic templates.
+
+- Message goal: First outreach — this is the first message to this contact
+- Channel: Email (can carry more context than LinkedIn, but should still open with a clear, specific first line)
+- Tone: Direct / concise — get to the point fast, minimal preamble
+- My background (use this to ground the message in something real — former employers, relevant experience, credentials — rather than generic language): 15+ years in OT (Operational Technology) cybersecurity consulting and practice-building. Founded and scaled EY's global OT cybersecurity practice from zero to a $10-30M pipeline. Principal Consultant, later Director with full P&L accountability over Schneider Electric's global OT cybersecurity advisory practice. Built and scaled Accenture's global OT cybersecurity capability, with hands-on deployment experience on Dragos, Nozomi Networks, and Claroty platforms.
+
+Companies, with what I've already researched about each:
+- Schneider Electric
+    Key Contact / Priority Title: VP, Cybersecurity Services
+    Warm Introduction Path: Direct — I held Director-level P&L accountability and founded the global OT cybersecurity advisory practice there (2014-2016).
+    Category: Target — OT vendor, existing practice
+    Target Audience: Hiring Manager
+- KPMG
+    Key Contact / Priority Title: Principal, Cyber Security Services
+    Warm Introduction Path: No direct alumni connection — sourced through an executive search firm.
+    Category: Target — Big 4, building OT practice
+    Target Audience: Recruiter
+- Dragos
+    Key Contact / Priority Title: Director, Professional Services
+    Warm Introduction Path: No direct alumni connection — hands-on platform familiarity from deploying Dragos at Accenture client engagements.
+    Category: Target — OT platform vendor
+
+For each company, do the following:
+1. Write 2-3 message variants appropriate for the channel and tone above, each one shaped by that specific company's Warm Introduction Path and Target Audience (where given) — don't write one generic message and swap in the company name. A company with a direct/former-colleague path should read differently from one where the path is a cold recruiter or executive search introduction. If Target Audience is given, let it further shape the message context specifically: a "Recruiter" audience should read differently from a "Hiring Manager" audience (a recruiter is typically screening for fit across many roles; a hiring manager cares more about the specific team and work), and "Cold Outreach" vs. "Warm Outreach (referral / existing connection)" should differ in how much the message can lean on an existing relationship versus needing to establish relevance from scratch. If Target Audience isn't given for a company, infer the closest fit from its Warm Introduction Path instead.
+2. After the variants, add one line of visible reasoning explaining which approach you took and why, referencing that company's specific Warm Introduction Path and/or Context Notes (whichever applies to the goal above) — e.g. "Leans on shared history directly since this is a former-colleague connection" or "References the Q4 budget timeline mentioned on the call rather than a generic thank-you." This is not optional — always include it, so I can catch it if something got misread before I send anything.
+3. For every variant, include a specific Subject line above the message body — not generic ("Reaching out" or similar), but tied to the actual company, role, or connection point for that message. Label it clearly as "Subject:" so it's obvious which line is the subject versus the body.
+
+CRITICAL — grounding guardrail: do not invent specific shared history, mutual connections, named colleagues, prior discussion topics, or personal details that weren't actually provided in the Warm Introduction Path, Target Audience, Context Notes, or my background above. If a Warm Introduction Path is vague (e.g. just "recruiter" or "executive search firm"), or Context Notes is thin or missing for a follow-up/thank-you/staying-in-touch message, keep the message appropriately general rather than fabricating false specifics to sound more personal or more informed than you actually are. A message that's honestly generic is fine. A message that fabricates a relationship, a conversation, or a detail is not.
+
+Present the result directly in your response — one section per company, each variant clearly labeled (with its Subject line clearly shown above the body), with the reasoning line set off from the message text (e.g. in italics or a blockquote) so it's easy to distinguish your notes from the actual message.
