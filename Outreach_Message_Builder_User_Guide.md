@@ -8,7 +8,7 @@ This tool is a single web page (`outreach_message_builder.html`) that turns your
 
 | Setting | Why you need it | Where to find it |
 |---|---|---|
-| **Code execution and file creation** | Only needed if you choose the downloadable Word document output format — lets Claude build and hand you a real `.docx` instead of a table in chat. | **Settings → Capabilities**, toggle it on. |
+| **Code execution and file creation** | Always needed — every result now comes back as a downloadable Word document. | **Settings → Capabilities**, toggle it on. |
 
 Unlike the other two tools in this family, this one doesn't strictly require **Web search** — it's drafting messages from research you've already provided, not looking anything up live. If you want Claude to double-check a detail (like confirming a contact's current title) while drafting, Web search would help, but it's optional here, not load-bearing the way it is for the Job Posting Finder.
 
@@ -115,10 +115,9 @@ If your Warm Introduction Path for a company is just "recruiter" or "executive s
 
 ---
 
-## 9. Output Format
+## 9. Output
 
-- **Table in chat** (default) — one section per company, each message variant labeled (with its Subject line shown for Email), with the reasoning line visually set apart (italics or a blockquote) from the message text itself.
-- **Downloadable Word document** — same structure, formatted as a `.docx` with a heading per company.
+Every result always comes back as a **downloadable Word document (.docx)** — there's no chat-table option anymore. It's formatted with one heading per company, each message variant labeled (with its Subject line shown for Email), and the reasoning line set apart in italics from the message text itself. This requires the **Code execution and file creation** setting (Settings → Capabilities) to be on; without it, Claude will fall back to a chat response.
 
 ---
 

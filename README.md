@@ -48,6 +48,7 @@ Three things, all non-optional in the generated prompt:
 ## Notes
 
 - This repo can be public or private — GitHub Pages on the free tier requires a public repo (or a paid plan for private-repo Pages).
+- Every result comes back as a downloadable Word document — this requires the **Code execution and file creation** setting in Claude (Settings → Capabilities).
 - Unlike the other two tools in this family, this one doesn't strictly require the Web search capability in Claude — it drafts from research you already provide, not a live lookup.
 - Choosing Email as the channel automatically requires a specific Subject line for every drafted variant, not a generic one.
 - The generated prompt opens with an explicit "execute this directly, don't ask clarifying questions" instruction, aimed at other AI tools (e.g. ChatGPT) that sometimes respond with questions instead of just running the task.

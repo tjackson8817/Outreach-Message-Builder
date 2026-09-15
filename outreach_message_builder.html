@@ -203,13 +203,7 @@
 
       <fieldset>
         <legend>3 · Output</legend>
-        <div class="field">
-          <label>Output format</label>
-          <div class="radio-row">
-            <label class="radio-opt"><input type="radio" name="outputFormat" value="table" checked> Table in chat</label>
-            <label class="radio-opt"><input type="radio" name="outputFormat" value="docx"> Downloadable Word document</label>
-          </div>
-        </div>
+        <p class="hint" style="margin-top:0;">Results always come back as a downloadable Word document (.docx) — this requires the Code execution and file creation setting in Claude (Settings → Capabilities).</p>
       </fieldset>
 
       <div class="banner">
@@ -390,7 +384,6 @@ function buildPrompt(){
   const goal = radioVal('goal');
   const channel = radioVal('channel');
   const tone = radioVal('tone');
-  const outputFormat = radioVal('outputFormat');
   const rows = pairedRows.filter(r => r.company);
 
   if(rows.length === 0){
@@ -442,11 +435,7 @@ function buildPrompt(){
   }
 
   lines.push("");
-  if(outputFormat === 'docx'){
-    lines.push(`Format the result as a downloadable Word document (.docx) — one heading per company, each variant clearly labeled underneath it${channel === 'email' ? ' (with its Subject line clearly shown above the body)' : ''}, and the reasoning line set off in italics so it's visually distinct from the message text itself.`);
-  } else {
-    lines.push(`Present the result directly in your response — one section per company, each variant clearly labeled${channel === 'email' ? ' (with its Subject line clearly shown above the body)' : ''}, with the reasoning line set off from the message text (e.g. in italics or a blockquote) so it's easy to distinguish your notes from the actual message.`);
-  }
+  lines.push(`Format the result as a downloadable Word document (.docx) — one heading per company, each variant clearly labeled underneath it${channel === 'email' ? ' (with its Subject line clearly shown above the body)' : ''}, and the reasoning line set off in italics so it's visually distinct from the message text itself.`);
 
   return lines.join("\n");
 }
