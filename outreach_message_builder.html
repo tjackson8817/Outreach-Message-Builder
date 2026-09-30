@@ -134,30 +134,30 @@
 
 <header>
   <h1>Outreach Message Builder</h1>
-  <p>Companion tool — turns your researched tracker rows into ready-to-send outreach messages, tailored per company and per stage (first outreach, follow-up, thank-you, or staying in touch).</p>
+  <p>Companion tool — turns your contact list into ready-to-send outreach messages, tailored per company and per stage (first outreach, follow-up, thank-you, or staying in touch).</p>
 </header>
 
 <div class="wrap">
   <div class="col">
 
     <div class="banner">
-      <b>Third tool in this family.</b> The Target Company Prompt Builder researches and ranks companies. The Job Posting Finder checks who's actively hiring. This one takes your shortlist — with its Key Contacts, Warm Introduction Path, and Category already researched — and drafts the actual messages, so you're not starting from a blank box.
+      <b>Third tool in this family.</b> The Target Company Prompt Builder researches and ranks companies. The Job Posting Finder checks who's actively hiring. This one takes your contacts — company, name, and title for each person — and drafts the actual messages, so you're not starting from a blank box.
     </div>
 
     <div class="card">
       <fieldset>
-        <legend>1 · Paste from your tracker <span class="tag">optional</span></legend>
+        <legend>1 · Paste from your contacts <span class="tag">optional</span></legend>
         <div class="field">
-          <label>Bulk paste — Company, Key Contacts, Warm Introduction Path, Category</label>
-          <textarea id="bulkPaste" placeholder="In Excel, Ctrl+click to select these 4 columns in this order (they aren't adjacent in the tracker): Company, Key Contacts / Priority Titles, Warm Introduction Path, Category. Copy, then paste here — one row per line."></textarea>
-          <p class="hint">Ctrl+click (or Cmd+click on Mac) lets you select non-adjacent columns in Excel and copy them together, tab-separated, in the order you clicked. That's what this box expects: Company, then Key Contacts, then Warm Introduction Path, then Category.</p>
+          <label>Bulk paste — Company, Contact Name, Title</label>
+          <textarea id="bulkPaste" placeholder="Copy 3 columns in this order: Company, Contact Name, Title — e.g. columns A–C of the Outreach Msg tab. Paste here, one contact per line."></textarea>
+          <p class="hint">Expects three tab-separated columns, in this order: Company, then Contact Name, then Title — exactly what you get by copying columns A–C of the <strong>Outreach Msg</strong> tab from a LinkedIn Contact Enrichment or Department Contact Finder workbook. Every row needs its own company name. A header row, if included, is skipped automatically. After parsing, you can add a Warm Introduction Path and Target Audience per row.</p>
           <button class="btn-secondary" id="parseBulkBtn" type="button" style="margin-top:8px;">Parse rows</button>
         </div>
         <div class="field" id="pairedPreviewField" style="display:none;">
           <label>Parsed rows — check these before generating your prompt</label>
           <div id="pairedPreview"></div>
           <button class="btn-secondary" id="addPairBtn" type="button" style="margin-top:8px;">+ Add row manually</button>
-          <p class="hint">No paste at all? Click above to build a row from scratch — company, contact, warm intro path, category, and target audience, one at a time.</p>
+          <p class="hint">No paste at all? Click above to build a row from scratch — company, contact name, title, warm intro path, and target audience, one at a time.</p>
         </div>
       </fieldset>
 
@@ -246,12 +246,13 @@ function parseBulkPaste(){
   lines.forEach(line => {
     const cells = line.split('\t').map(c => c.trim());
     if(!cells[0]) return;
-    if(cells[0].toLowerCase() === 'company') return; // skip an obvious header row
+    const head = cells[0].toLowerCase();
+    if(head === 'company' || head === 'company name') return; // skip an obvious header row
     pairedRows.push({
       company: cells[0] || '',
-      contact: cells[1] || '',
-      warmIntro: cells[2] || '',
-      category: cells[3] || '',
+      name: cells[1] || '',
+      title: cells[2] || '',
+      warmIntro: '',
       audience: '',
       contextNotes: '',
     });
@@ -315,9 +316,9 @@ function renderPairedPreview(){
       : '';
     div.innerHTML = `
       <input type="text" data-idx="${idx}" data-field="company" value="${row.company.replace(/"/g,'&quot;')}" placeholder="Company">
-      <input type="text" data-idx="${idx}" data-field="contact" value="${row.contact.replace(/"/g,'&quot;')}" placeholder="Key Contacts">
+      <input type="text" data-idx="${idx}" data-field="name" value="${(row.name||'').replace(/"/g,'&quot;')}" placeholder="Contact Name">
+      <input type="text" data-idx="${idx}" data-field="title" value="${(row.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
       <input type="text" data-idx="${idx}" data-field="warmIntro" value="${row.warmIntro.replace(/"/g,'&quot;')}" placeholder="Warm Introduction Path">
-      <input type="text" data-idx="${idx}" data-field="category" value="${row.category.replace(/"/g,'&quot;')}" placeholder="Category">
       <select data-idx="${idx}" data-field="audience" style="flex:1.3;min-width:150px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;">${audienceOptionsHtml}</select>
       <button type="button" data-remove="${idx}">\u00d7</button>
       ${contextInputHtml}
@@ -352,7 +353,7 @@ function renderPairedPreview(){
 
 document.getElementById('parseBulkBtn').addEventListener('click', parseBulkPaste);
 document.getElementById('addPairBtn').addEventListener('click', () => {
-  pairedRows.push({ company: '', contact: '', warmIntro: '', category: '', audience: '', contextNotes: '' });
+  pairedRows.push({ company: '', name: '', title: '', warmIntro: '', audience: '', contextNotes: '' });
   renderPairedPreview();
 });
 
@@ -406,9 +407,9 @@ function buildPrompt(){
   lines.push(`Companies, with what I've already researched about each:`);
   rows.forEach(r => {
     lines.push(`- ${r.company}`);
-    if(r.contact) lines.push(`    Key Contact / Priority Title: ${r.contact}`);
+    if(r.name) lines.push(`    Contact Name: ${r.name}`);
+    if(r.title) lines.push(`    Title: ${r.title}`);
     if(r.warmIntro) lines.push(`    Warm Introduction Path: ${r.warmIntro}`);
-    if(r.category) lines.push(`    Category: ${r.category}`);
     if(r.audience) lines.push(`    Target Audience: ${audienceLabel(r.audience)}`);
     if(r.contextNotes) lines.push(`    Context Notes: ${r.contextNotes}`);
   });
@@ -565,14 +566,16 @@ function loadParseRows(text){
   lines.forEach(line => {
     let m;
     if(m = line.match(/^- (.+)$/)){
-      current = { company: m[1].trim(), contact: '', warmIntro: '', category: '', audience: '', contextNotes: '' };
+      current = { company: m[1].trim(), name: '', title: '', warmIntro: '', audience: '', contextNotes: '' };
       rows.push(current);
       return;
     }
     if(!current) return;
-    if(m = line.match(/^ {4}Key Contact \/ Priority Title: (.*)$/)){ current.contact = m[1].trim(); return; }
+    if(m = line.match(/^ {4}Contact Name: (.*)$/)){ current.name = m[1].trim(); return; }
+    if(m = line.match(/^ {4}Title: (.*)$/)){ current.title = m[1].trim(); return; }
+    // Older prompts: "Key Contact / Priority Title" loads into Title; old Category lines are ignored
+    if(m = line.match(/^ {4}Key Contact \/ Priority Title: (.*)$/)){ current.title = m[1].trim(); return; }
     if(m = line.match(/^ {4}Warm Introduction Path: (.*)$/)){ current.warmIntro = m[1].trim(); return; }
-    if(m = line.match(/^ {4}Category: (.*)$/)){ current.category = m[1].trim(); return; }
     if(m = line.match(/^ {4}Target Audience: (.*)$/)){ current.audience = loadAudienceValueFromLabel(m[1].trim()); return; }
     if(m = line.match(/^ {4}Context Notes: (.*)$/)){ current.contextNotes = m[1].trim(); return; }
   });
@@ -604,8 +607,8 @@ function populateLoadedPrompt(data){
   document.getElementById('background').value = data.background;
 
   pairedRows = data.rows.map(r => ({
-    company: r.company, contact: r.contact, warmIntro: r.warmIntro,
-    category: r.category, audience: r.audience, contextNotes: r.contextNotes,
+    company: r.company, name: r.name, title: r.title, warmIntro: r.warmIntro,
+    audience: r.audience, contextNotes: r.contextNotes,
   }));
   renderPairedPreview();
   render();

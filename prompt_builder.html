@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Target Company Research Prompt Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --navy:#0f2d3d;
+    --blue:#1b6fa8;
+    --teal:#0f9b8e;
+    --bg:#f4f7f9;
+    --card:#ffffff;
+    --border:#d7e0e5;
+    --text:#1c2b33;
+    --muted:#5b6b73;
+    --tag-bg:#e7f1f7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:linear-gradient(135deg,var(--navy),var(--blue));
+    color:#fff;
+    padding:24px 32px;
+  }
+  header h1{margin:0 0 4px 0;font-size:22px;}
+  header p{margin:0;opacity:.85;font-size:14px;}
+  .wrap{
+    display:flex;
+    gap:24px;
+    padding:24px;
+    max-width:1400px;
+    margin:0 auto;
+    align-items:flex-start;
+  }
+  .col{flex:1;min-width:0;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  fieldset{
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin:0 0 18px 0;
+    padding:14px 16px 16px 16px;
+  }
+  legend{font-weight:600;color:var(--navy);padding:0 6px;font-size:14px;}
+  .field{margin-bottom:14px;}
+  label{
+    display:block;
+    font-weight:600;
+    font-size:13.5px;
+    margin-bottom:5px;
+    color:var(--navy);
+  }
+  .tag{
+    background:var(--tag-bg);
+    color:var(--blue);
+    font-size:10.5px;
+    font-weight:600;
+    padding:2px 7px;
+    border-radius:10px;
+    margin-left:6px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+  .hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;}
+  .hint a{color:var(--blue);}
+  input[type=text], textarea, select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fcfdfe;
+  }
+  textarea{resize:vertical;min-height:56px;}
+  .radio-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:2px;}
+  .radio-opt{display:flex;align-items:center;gap:6px;font-size:13.5px;}
+  .radio-opt input{width:auto;}
+  #outputPanel{
+    position:sticky;
+    top:24px;
+  }
+  #promptText, #bulkPromptText, #enrichPromptText, #deptPromptText{
+    white-space:pre-wrap;
+    font-family:"SFMono-Regular",Consolas,Menlo,monospace;
+    font-size:12.5px;
+    background:#0f2d3d;
+    color:#dff1ec;
+    padding:16px;
+    border-radius:8px;
+    max-height:520px;
+    overflow-y:auto;
+    line-height:1.5;
+  }
+  .btn-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    padding:9px 16px;
+    font-size:13.5px;
+    font-weight:600;
+    font-family:inherit;
+  }
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:#0c8579;}
+  .btn-secondary{background:var(--tag-bg);color:var(--blue);}
+  .btn-secondary:hover{background:#d9e9f2;}
+  .btn-danger{background:#fbeaea;color:#b23b3b;}
+  .btn-danger:hover{background:#f6d9d9;}
+  .stat-line{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  #placeholder{color:var(--muted);font-style:italic;font-size:13.5px;}
+  .row{padding:0 24px;max-width:1400px;margin:0 auto;}
+  .divider{height:1px;background:var(--border);margin:16px 0;}
+
+  @media (max-width: 860px){
+    .wrap{flex-direction:column;padding:14px;gap:14px;}
+    .row{padding:0 14px;}
+    #outputPanel{position:static;}
+    #promptText, #bulkPromptText, #enrichPromptText{max-height:340px;font-size:12px;}
+    header{padding:18px 16px;}
+    header h1{font-size:19px;}
+    .card{padding:16px 14px;}
+    .radio-row{gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Target Company Research Prompt Builder</h1>
+  <p>Fill in what you know once — Section 1 builds the detailed company pull (full research tracker), Section 2 builds an optional wide-net bulk pull, Section 3 builds LinkedIn contact enrichment, Section 4 finds named department contacts via web search. v4</p>
+</header>
+
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <fieldset>
+        <legend>Shared Inputs</legend>
+        <p class="hint" style="margin-top:-4px;margin-bottom:12px;">Fill in at least one of these — use more than one if you have them, and they'll be combined. These feed both Section 1 (Detailed Company Pull) and Section 2 (Bulk Company Pull) below.</p>
+
+        <div class="field">
+          <label for="companies">Company(s) you know <span class="tag">optional</span></label>
+          <textarea id="companies" placeholder="e.g. Dragos, Claroty, Nozomi Networks"></textarea>
+          <p class="hint" id="companiesCountHint">Each company here seeds the discovery/competitor-cascade methods below — roughly 2+ searches apiece before any expansion. 5-10 tends to give the cleanest results.</p>
+        </div>
+
+        <div class="field">
+          <label for="industry">Industry / field, plain language <span class="tag">optional</span></label>
+          <input type="text" id="industry" placeholder="e.g. commercial HVAC controls">
+          <p class="hint">Be as specific as you can — free-text phrases don't map cleanly to a single NAICS code, so a vague phrase here is more likely to produce a bad code extraction. The prompt asks Claude to state which keyword it used, so you can catch a bad match early. Not sure how to phrase it? Browse official industry names and definitions at the <a href="https://www.census.gov/naics/" target="_blank" rel="noopener">Census NAICS Search</a> — you don't need to find your own code, just borrow their wording.</p>
+        </div>
+
+        <div class="field">
+          <label for="naics">NAICS code(s), if known <span class="tag">optional</span></label>
+          <input type="text" id="naics" placeholder="Leave blank if unknown — Claude will look it up">
+          <p class="hint">NAICS codes in this tool are a supporting layer (up to 5 per company, for classification and per-company verification), not the main way new companies get found — a code alone is too broad to search by. New companies mainly come from competitor lookups, analyst/category lists, conference exhibitor lists, and live job postings tied to what you named above.</p>
+        </div>
+
+        <div class="field">
+          <label for="excludeCompanies">Exclude these companies <span class="tag">optional</span></label>
+          <textarea id="excludeCompanies" placeholder="Companies to leave out entirely, even if they'd otherwise match"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="companySize">Limit to company size <span class="tag">optional</span></label>
+          <input type="text" id="companySize" placeholder="e.g. under 1,000 employees">
+          <p class="hint">Phrased as a filter Claude applies while researching. Leave blank to include companies of any size.</p>
+        </div>
+
+        <div class="field">
+          <label for="zipCode">Limit to a location radius <span class="tag">optional</span></label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="zipCode" placeholder="ZIP code, e.g. 60601" style="flex:1;">
+            <input type="text" id="radiusMiles" placeholder="Radius (miles)" value="100" style="width:150px;">
+          </div>
+          <p class="hint">Leave the ZIP code blank to search all locations with no distance restriction. If you enter a ZIP, the radius defaults to 100 miles but can be changed. This is separate from "Preferred location / work arrangement" further down, which is about your own job-search preferences rather than filtering candidate companies by distance.</p>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="col">
+
+    <div class="card">
+      <h2>Section 1 — Detailed Company Pull</h2>
+      <p class="hint">The main tool — full per-company research (up to 36 columns) and a fully formatted Excel tracker, built from the Shared Inputs above plus everything you set below.</p>
+      <fieldset>
+        <legend>Section 1 · Scope &amp; purpose</legend>
+
+        <div class="field">
+          <label>Discovery scope</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="scope" value="find" checked> Find new companies</label>
+            <label class="radio-opt"><input type="radio" name="scope" value="enrich"> Just enrich these</label>
+          </div>
+          <p class="hint">"Find new companies" = Claude does its own moderate discovery (competitor cascade, analyst lists, conference exhibitor lists, job postings) bundled into the full research pass — good for "I have a few companies, expand modestly and research everything fully." "Just enrich these" = Claude only researches the exact company names you typed — no new companies added. If you ran Section 2's Bulk Company Pull (below) and pasted your pruned list into "Company(s) you know" above, choose "Just enrich these" here — Section 2 already did the wide discovery, so a second discovery pass isn't needed and would just add expensive-to-research companies you didn't vet.</p>
+        </div>
+
+        <div class="field" id="perCodeField">
+          <label for="perCode">Roughly how many companies to find <span class="tag">optional</span></label>
+          <input type="text" id="perCode" placeholder="e.g. 15-30 — leave blank for Claude's judgment">
+          <p class="hint">The Section 2 equivalent of "Target list size" — a loose volume dial for this discovery pass (competitor cascade, analyst lists, conferences, job postings). Unlike Section 2, every company found here gets full research, so totals above ~50–75 tend to come back thinner per company — batch it, or use Section 2's wider, cheaper Bulk Company Pull (below) instead, if you need more.</p>
+        </div>
+
+        <div class="field" id="tieredToggleField">
+          <label>Use a two-tier target list?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="tiered" value="no" checked> No — one flat list</label>
+            <label class="radio-opt"><input type="radio" name="tiered" value="yes"> Yes — Tier 1 (full detail) + Tier 2 (lighter)</label>
+          </div>
+          <p class="hint">"Yes" has Claude build a wider candidate pool using the discovery method below (competitor cascade, analyst/category sources, conference exhibitor lists, job postings), rank the whole pool against your purpose, then fully research your top companies (Tier 1 — every column) while giving the rest (Tier 2) a lighter pass with a slimmer column set.</p>
+        </div>
+
+        <div class="field" id="tier1SizeField" style="display:none;">
+          <label for="tier1Size">Tier 1 size (full detail)</label>
+          <input type="text" id="tier1Size" placeholder="e.g. 25" value="25">
+          <p class="hint">These get every column below, fully researched — careers pages, hiring signals, named contacts, the works.</p>
+        </div>
+
+        <div class="field" id="tier2SizeField" style="display:none;">
+          <label for="tier2Size">Tier 2 size (lighter detail)</label>
+          <input type="text" id="tier2Size" placeholder="e.g. 75" value="75">
+          <p class="hint">These skip the expensive per-company lookups (job-board checks, 10-K/proxy research, named contacts, keyword generation) and just get enough to judge fit and know who they are. The generated prompt now explicitly requires both tabs to come back populated — if a past run left this tab empty, that instruction is what was missing.</p>
+        </div>
+
+        <div class="field" id="secondaryField">
+          <label>Include secondary/adjacent NAICS codes?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="secondary" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="secondary" value="no"> No</label>
+          </div>
+          <p class="hint">"Yes" broadens the search to suppliers, vendors, and related-but-differently-classified industries. "No" keeps it tightly scoped to your exact code(s).</p>
+        </div>
+
+        <div class="field">
+          <label for="purpose">What is this list for?</label>
+          <textarea id="purpose" placeholder='e.g. "job search targets for a Director-level OT cybersecurity role" or "prospective customers for our SaaS product"'></textarea>
+          <p class="hint">The most important field — it tells Claude how to judge Category, Key Contact, Opportunity Fit, and Why This Fits for every company. Be specific.</p>
+        </div>
+
+        <div class="field">
+          <label for="location">Preferred location / work arrangement <span class="tag">optional</span></label>
+          <input type="text" id="location" placeholder="e.g. Texas or remote">
+        </div>
+
+        <div class="field">
+          <label for="background">Your background <span class="tag">optional</span></label>
+          <textarea id="background" placeholder="Paste a few lines from your resume, CV, LinkedIn bio, or a summary of your relevant experience — e.g. '8 years in federal OT cybersecurity consulting, former Booz Allen and SAIC'"></textarea>
+          <p class="hint">Not a file upload — paste text directly (resume, CV, bio, LinkedIn summary, or just a few sentences — whatever you have). No length limit, but a tight paragraph of relevant highlights tends to work better than pasting a full multi-page document — it's easier for Claude to weigh correctly. Sharpens the Suggested Job Title Keywords column and gives Claude something real to reason from for Warm Introduction Path (former employers, overlapping experience) instead of guessing generically.</p>
+        </div>
+
+        <div class="field">
+          <label>Include full visual formatting in the tracker?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="formatting" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="formatting" value="no"> No — just the data</label>
+          </div>
+          <p class="hint">"Yes" (default) asks for the full formatted tracker: color-coded rating columns, a computed Suggested Priority Rank column, clickable Website links, autofilter, frozen panes, zebra striping, and separate Notes/Summary tabs — the same conventions used throughout this project, spelled out explicitly so you get them in any chat, not just this one. "No" asks for a plain data-only spreadsheet if you'd rather skip the extra formatting.</p>
+        </div>
+
+        <div class="field">
+          <label>Add a Job Posting Quick Links tab?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="quickLinks" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="quickLinks" value="no"> No</label>
+          </div>
+          <p class="hint">"Yes" (default) adds a second sheet with one-click LinkedIn Jobs, Indeed, and Google Jobs search links per company — built from the Company and Suggested Job Title Keywords columns using Excel HYPERLINK() formulas, so the links stay live and update automatically if you edit either cell later. This is a search-link generator, not a source of actual live postings — for real postings data, that's a separate tool/step (see the User Guide).</p>
+        </div>
+
+        <div class="field">
+          <label>Add a Job Post Finder tab?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="jobFinder" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="jobFinder" value="no"> No</label>
+          </div>
+          <p class="hint">"Yes" (default) adds a simple two-column "Job Post Finder" tab — Company Name in column A and Suggested Job Title Keywords in column B, copied straight from the main tracker, one row per company. No formulas or hardcoded job boards, just plain data: run the target list first, then come to this tab and copy a company name plus its keyword variants to paste into whichever job board or search engine you want to check by hand. This complements the Job Posting Quick Links tab above rather than replacing it — that one gives pre-built clickable links to three specific platforms using a single title; this one gives you the raw company-and-keywords pair, with all title variants, to search anywhere yourself.</p>
+        </div>
+
+        <div class="field">
+          <label>Add an Outreach Contacts tab?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="outreachContacts" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="outreachContacts" value="no"> No</label>
+          </div>
+          <p class="hint">"Yes" (default) adds a plain four-column "Outreach Contacts" tab — Company, Key Contacts / Priority Titles, Warm Introduction Path, and Category, in that exact order, copied straight from the main tracker. These four columns aren't adjacent on the main sheet, so pulling them together today means Ctrl+click-selecting four separate columns by hand — easy to get the order wrong or skip one by mistake. This tab puts them side by side instead, so you can just click-drag the whole block and paste it directly into the Outreach Message Builder's bulk-paste box (a separate companion tool), no multi-select needed.</p>
+        </div>
+
+        <div class="field">
+          <label>Add an Industry Events & Forums tab?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="events" value="yes" checked> Yes</label>
+            <label class="radio-opt"><input type="radio" name="events" value="no"> No</label>
+          </div>
+          <p class="hint">"Yes" (default) adds a tab of real, upcoming industry conferences and trade shows relevant to your stated industry/purpose — one row per event, not per company, since the same event is often relevant to several companies on your list at once. Each event's "Relevant To" field reuses your Category column, so it stays connected to however you've grouped your companies.</p>
+        </div>
+
+        <div class="field" id="eventsWindowField">
+          <label>How far ahead should events be?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="eventsWindow" value="6"> Next 6 months</label>
+            <label class="radio-opt"><input type="radio" name="eventsWindow" value="12" checked> Next 12 months</label>
+            <label class="radio-opt"><input type="radio" name="eventsWindow" value="any"> Any upcoming</label>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Add a Company Activity &amp; Events tab? <span class="tag">optional</span></label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="companyEvents" value="yes"> Yes</label>
+            <label class="radio-opt"><input type="radio" name="companyEvents" value="no" checked> No</label>
+          </div>
+          <p class="hint">Different from the tab above — this one is one row per <strong>company</strong> (not per event), tracking each company's own public activity: recent LinkedIn posts/announcements, podcast or webcast appearances, and upcoming events/tradeshows they're attending or speaking at. This is much harder to verify reliably via search than a public conference calendar, so expect real gaps — Claude is instructed to leave rows blank rather than invent activity that isn't actually findable.</p>
+        </div>
+
+        <div class="field" id="companyEventsWindowField">
+          <label>How far back for recent activity?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="companyEventsWindow" value="30"> Last 30 days</label>
+            <label class="radio-opt"><input type="radio" name="companyEventsWindow" value="90" checked> Last 90 days</label>
+            <label class="radio-opt"><input type="radio" name="companyEventsWindow" value="180"> Last 6 months</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>M&amp;A research columns <span class="tag">optional</span></legend>
+
+        <div class="field">
+          <label>Add M&amp;A-specific columns?</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="maEnabled" value="no" checked> No</label>
+            <label class="radio-opt"><input type="radio" name="maEnabled" value="yes"> Yes</label>
+          </div>
+        </div>
+
+        <div class="field" id="maAngleField" style="display:none;">
+          <label>M&amp;A angle</label>
+          <div class="radio-row">
+            <label class="radio-opt"><input type="radio" name="maAngle" value="target" checked> Find acquisition targets</label>
+            <label class="radio-opt"><input type="radio" name="maAngle" value="acquirer"> Find likely acquirers</label>
+            <label class="radio-opt"><input type="radio" name="maAngle" value="either"> Show fit for either</label>
+          </div>
+          <p class="hint">"Find acquisition targets" = you're the buyer. "Find likely acquirers" = you want to know who might buy companies like yours. "Either" rates both directions per company.</p>
+        </div>
+      </fieldset>
+
+      <button class="btn-danger" id="resetBtn">Reset all fields</button>
+    </div>
+  </div>
+
+  <div class="col" id="outputPanel">
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn-primary" id="copyBtn">Copy prompt</button>
+        <button class="btn-secondary" id="downloadBtn">Download .txt</button>
+        <button class="btn-secondary" id="loadMainBtn" type="button">Load .txt to edit</button>
+        <input type="file" id="loadMainInput" accept=".txt" style="display:none;">
+      </div>
+      <p class="hint" id="loadMainStatus"></p>
+      <div class="stat-line"><span id="fieldCount">0</span> of 10 fields filled in</div>
+      <div id="promptText"><span id="placeholder">Fill in at least one starting-point field or a purpose to see your prompt appear here.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <div class="card">
+      <h2>Section 2 (optional) — Bulk Company Pull</h2>
+      <p class="hint">A separate, cheap, wide-net prompt. Instead of full 31-column research per company, this asks Claude to build a fast flat list — Company, Website, Inferred NAICS Code, one-line description, Source — using the same competitor-cascade / analyst-list / conference-exhibitor / job-posting discovery methods as Section 1, just without the deep per-company research. Meant to be pruned by hand afterward: delete the rows that aren't relevant, then paste the survivors into "Company(s) you know" above and set Section 1's Discovery scope to "Just enrich these" so the full research pass only spends effort on companies you've already confirmed you want.</p>
+
+      <div class="field">
+        <label for="bulkSize">Target list size</label>
+        <input type="text" id="bulkSize" placeholder="e.g. 75-100" value="75-100">
+        <p class="hint">Since there's no per-company deep research here, this can go wider than Section 1's ~50-75 ceiling. Still bounded by how much a given seed/industry can actually support — Claude will say so if it can't find enough distinct real companies rather than padding the list.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="copyBulkBtn">Copy prompt</button>
+        <button class="btn-secondary" id="downloadBulkBtn">Download .txt</button>
+        <button class="btn-secondary" id="loadBulkBtn" type="button">Load .txt to edit</button>
+        <input type="file" id="loadBulkInput" accept=".txt" style="display:none;">
+      </div>
+      <p class="hint" id="loadBulkStatus"></p>
+      <div id="bulkPromptText"><span id="bulkPlaceholder">Fill in at least one Shared Input above (company, industry, or NAICS code) to see this prompt appear here.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="enrichRow">
+  <div class="col">
+    <div class="card">
+      <h2>Section 3 (optional) — LinkedIn Contact Enrichment</h2>
+      <p class="hint">This is a separate, focused prompt for cross-referencing your LinkedIn Contacts export against your Top Targeted Companies to surface warm introduction paths. This is a heavier processing lift, so it works best with <strong>25 or fewer companies</strong> — the more companies you list, the more Claude has to fuzzy-match against for every single contact, which slows down the processing and can hurt match quality.</p>
+      <p class="hint">Run it separately from the Target Company Prompt Builder above: run that tool first, then paste your Top 25 companies below to build this prompt. Download the .txt, then paste that prompt into Claude along with your exported LinkedIn Contacts .csv export. There's no need to upload or paste the CSV here — this tool never touches the actual file.</p>
+      <div class="field">
+        <label for="enrichCompanies">Your target companies (one per line)</label>
+        <textarea id="enrichCompanies" rows="6" placeholder="Paste the Company column from your tracker, or type company names, one per line — 25 or fewer works best"></textarea>
+        <p class="hint" id="enrichCountHint"></p>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="copyEnrichBtn">Copy prompt</button>
+        <button class="btn-secondary" id="downloadEnrichBtn">Download .txt</button>
+        <button class="btn-secondary" id="loadEnrichBtn" type="button">Load .txt to edit</button>
+        <input type="file" id="loadEnrichInput" accept=".txt" style="display:none;">
+      </div>
+      <p class="hint" id="loadEnrichStatus"></p>
+      <div id="enrichPromptText"><span id="enrichPlaceholder">Paste your top 25 companies from the Target Company spreadsheet above to see this prompt appear here.</span></div>
+
+      <div style="margin-top:20px;padding:14px 16px;background:#fcfdfe;border:1px solid var(--border);border-radius:8px;">
+        <p class="hint" style="font-size:13px;color:var(--text);margin-top:0;"><strong>NOTE:</strong></p>
+        <p class="hint" style="font-size:13px;color:var(--text);"><strong>Steps to export your LinkedIn profile (w/ contact data):</strong></p>
+        <ul class="hint" style="font-size:13px;color:var(--text);margin:0 0 12px 18px;padding:0;line-height:1.6;">
+          <li>Log into desktop LinkedIn.</li>
+          <li>Click your <strong>Me</strong> icon at the top of the page.</li>
+          <li>Select <strong>Settings &amp; Privacy</strong>.</li>
+          <li>Click <strong>Data privacy</strong> on the left menu.</li>
+          <li>Click <strong>Get a copy of your data</strong>.</li>
+          <li>Choose <strong>Download larger data archive, including connections, verifications, contacts, account history, and information we infer about you based on your profile and activity</strong>.</li>
+        </ul>
+        <p class="hint" style="font-size:13px;color:var(--text);"><strong>For each match found, the report has:</strong></p>
+        <ul class="hint" style="font-size:13px;color:var(--text);margin:0 0 12px 18px;padding:0;line-height:1.6;">
+          <li>Company — from your list above</li>
+          <li>Matched Contact Name</li>
+          <li>Contact's Title — as listed in the CSV</li>
+          <li>Contact's LinkedIn Profile URL — if present in the CSV</li>
+          <li>Current or Former — notes if the CSV or context suggests this is a past employer for that contact; a former employee can still be a useful warm intro, but it's a different kind of connection than someone there now, so these aren't blended together</li>
+          <li>Match Confidence — High (exact company name match), Medium (clear variant/subsidiary match), or Low (plausible but uncertain, e.g. a similar name or ambiguous abbreviation)</li>
+        </ul>
+        <p class="hint" style="font-size:13px;color:var(--text);margin-bottom:0;">If a target company has no matching contact in your CSV, it's still included in the results as "No match found" rather than omitted, so you can see coverage across your full list. The result is formatted as an Excel workbook (.xlsx).</p>
+        <p class="hint" style="font-size:13px;color:var(--text);margin-bottom:0;margin-top:10px;"><strong>Outreach Msg tab:</strong> the workbook also gets a second tab, <strong>Outreach Msg</strong>, with three columns — Company Name, Name, Title — and one contact per row, with the company name repeated on every row. It's laid out for the Outreach Message Builder: select columns A–C (header included), copy, paste into that tool's bulk-paste box, and click <strong>Parse rows</strong>. Former employees are marked "(former employee)" after their title, and companies with no match are left off this tab.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="deptRow">
+  <div class="col">
+    <div class="card">
+      <h2>Section 4 (optional) — Department Contact Finder</h2>
+      <p class="hint">A separate, focused prompt that finds <strong>named individuals</strong> at a target company who work in or near a specific role/department — sourced from public web research (LinkedIn profiles, company team pages, press, case studies), not your own contacts. This is the fulfillment step for the main tracker's <strong>Key Contacts / Priority Titles</strong> column, which often comes back as a placeholder like "Practice-level title only — no named individual confirmed" — this prompt exists to turn that into real names. Works best with <strong>15 or fewer companies</strong>, since each company/role pair needs its own live web search — a heavier per-company lift than Section 3's fuzzy-match.</p>
+      <p class="hint">Run it separately: paste your target companies below, along with the role/department you're targeting — the shortest variant from your tracker's <strong>Suggested Job Title Keywords</strong> column tends to work better here than the full title (e.g. "Cyber Risk OT" rather than "Managing Director, Cyber Risk OT" — dropping the seniority level widens the search instead of narrowing it to one level). Download the .txt, then paste into a <strong>new chat with web search enabled</strong>.</p>
+
+      <div class="field">
+        <label for="deptCompanies">Your target companies (one per line, 15 or fewer)</label>
+        <textarea id="deptCompanies" rows="6" placeholder="Paste the Company column from your tracker, or type company names, one per line — 15 or fewer works best"></textarea>
+        <p class="hint" id="deptCountHint"></p>
+      </div>
+
+      <div class="field">
+        <label for="deptRole">Target role / department</label>
+        <input type="text" id="deptRole" placeholder='e.g. "OT Cybersecurity" or "Audit" — a department/practice name, not a full job title'>
+        <p class="hint">Pulled from your tracker's Suggested Job Title Keywords if you have one open — use the shortest variant. This is what the search matches against, tiered by closeness (see below).</p>
+      </div>
+
+      <div class="field">
+        <label>Include adjacent teams?</label>
+        <div class="radio-row">
+          <label class="radio-opt"><input type="radio" name="deptAdjacent" value="yes" checked> Yes — widen beyond an exact match</label>
+          <label class="radio-opt"><input type="radio" name="deptAdjacent" value="no"> No — exact department match only</label>
+        </div>
+        <p class="hint">"Yes" (default) also returns Tier 2 (adjacent practice, broader scope) and Tier 3 (umbrella/parent practice) matches when an exact match is thin — every result is still labeled with its tier, never blended in silently. "No" returns Tier 1 exact matches only, and says so plainly when a company has none, rather than substituting a looser match.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="copyDeptBtn">Copy prompt</button>
+        <button class="btn-secondary" id="downloadDeptBtn">Download .txt</button>
+        <button class="btn-secondary" id="loadDeptBtn" type="button">Load .txt to edit</button>
+        <input type="file" id="loadDeptInput" accept=".txt" style="display:none;">
+      </div>
+      <p class="hint" id="loadDeptStatus"></p>
+      <div id="deptPromptText"><span id="deptPlaceholder">Fill in your target companies and a target role/department above to see this prompt appear here.</span></div>
+
+      <div style="margin-top:20px;padding:14px 16px;background:#fcfdfe;border:1px solid var(--border);border-radius:8px;">
+        <p class="hint" style="font-size:13px;color:var(--text);margin-top:0;"><strong>Match tiers used in this prompt:</strong></p>
+        <ul class="hint" style="font-size:13px;color:var(--text);margin:0 0 12px 18px;padding:0;line-height:1.6;">
+          <li><strong>Tier 1 — Exact:</strong> title or team name matches the target role/department directly.</li>
+          <li><strong>Tier 2 — Adjacent:</strong> same general practice area, broader scope than the target.</li>
+          <li><strong>Tier 3 — Umbrella:</strong> parent practice or risk/functional area likely overseeing the target area.</li>
+        </ul>
+        <p class="hint" style="font-size:13px;color:var(--text);margin-bottom:0;">For each match found, the report has Company, Matched Person's Name, Title, Department/Team (as stated in the source), Match Tier, Source, and a Confidence rating (High/Medium/Low). Companies with no usable public results are listed as "No public matches found" rather than dropped. The result is formatted as an Excel workbook (.xlsx), with rows ready to paste back into the tracker's Key Contacts / Priority Titles column.</p>
+        <p class="hint" style="font-size:13px;color:var(--text);margin-bottom:0;margin-top:10px;"><strong>Outreach Msg tab:</strong> the workbook also gets a second tab, <strong>Outreach Msg</strong>, with three columns — Company Name, Name, Title — and one person per row, with the company name repeated on every row. It's laid out for the Outreach Message Builder: select columns A–C (header included), copy, paste into that tool's bulk-paste box, and click <strong>Parse rows</strong>. Companies with no public matches are left off this tab.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const fieldCountEl = document.getElementById('fieldCount');
+const promptTextEl = document.getElementById('promptText');
+
+function val(id){ return document.getElementById(id).value.trim(); }
+function radioVal(name){
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
+}
+
+function toggleMaAngleField(){
+  document.getElementById('maAngleField').style.display =
+    radioVal('maEnabled') === 'yes' ? 'block' : 'none';
+}
+
+function toggleTierFields(){
+  const show = radioVal('tiered') === 'yes' && radioVal('scope') === 'find' ? 'block' : 'none';
+  document.getElementById('tier1SizeField').style.display = show;
+  document.getElementById('tier2SizeField').style.display = show;
+}
+
+function toggleScopeFields(){
+  const findMode = radioVal('scope') === 'find';
+  const show = findMode ? 'block' : 'none';
+  document.getElementById('perCodeField').style.display = show;
+  document.getElementById('secondaryField').style.display = show;
+  document.getElementById('tieredToggleField').style.display = show;
+  toggleTierFields();
+}
+
+function buildPrompt(){
+  const companies = val('companies');
+  const industry = val('industry');
+  const naics = val('naics');
+  const exclude = val('excludeCompanies');
+  const companySize = val('companySize');
+  const zip = val('zipCode');
+  const radius = val('radiusMiles') || '100';
+  const perCode = val('perCode') || "your judgment";
+  const purpose = val('purpose');
+  const location = val('location');
+  const background = val('background');
+  const formatting = radioVal('formatting') !== 'no'; // default true
+  const quickLinks = radioVal('quickLinks') !== 'no'; // default true
+  const jobFinder = radioVal('jobFinder') !== 'no'; // default true
+  const outreachContacts = radioVal('outreachContacts') !== 'no'; // default true
+  const events = radioVal('events') !== 'no'; // default true
+  const eventsWindow = radioVal('eventsWindow') || '12';
+  const companyEvents = radioVal('companyEvents') === 'yes'; // default false
+  const companyEventsWindow = radioVal('companyEventsWindow') || '90';
+  const scope = radioVal('scope');
+  const secondary = radioVal('secondary');
+  const tiered = radioVal('tiered') === 'yes';
+  const tieredActive = tiered && scope === 'find'; // tiering only makes sense when there's a discovered pool to rank; in enrich-only mode there's no ranking rationale for a split
+  const tier1Size = val('tier1Size') || '25';
+  const tier2Size = val('tier2Size') || '75';
+  const maEnabled = radioVal('maEnabled') === 'yes';
+  const maAngle = radioVal('maAngle');
+
+  const haveStart = companies || industry || naics;
+  let filled = 0;
+  [companies, industry, naics, exclude, companySize, zip, val('perCode'), purpose, location, background].forEach(v => { if(v) filled++; });
+  fieldCountEl.textContent = filled;
+
+  if(!haveStart && !purpose){
+    return null;
+  }
+
+  let lines = [];
+  lines.push(`Please execute this task directly — research and build the actual file now, rather than first describing your plan, summarizing what you're about to do, or offering recommendations about how to proceed. If a genuine capability limitation prevents you from completing part of this (e.g., no file-creation tool available, no web search), say so plainly and do as much as you actually can — but don't pause to ask permission, outline an approach, or check in before starting the real work.`);
+  lines.push("");
+  lines.push(`I want you to research target companies and build a formatted Excel tracker (.xlsx). Here's what I have:`);
+  lines.push("");
+  if(companies) lines.push(`- Company/companies I know: ${companies}`);
+  if(industry) lines.push(`- Industry / field (plain language): ${industry}`);
+  if(naics) lines.push(`- NAICS code(s) I already know: ${naics}`);
+  lines.push(`- Discovery scope: ${scope === 'enrich' ? 'Just research the exact companies I named above — do not generate new candidates.' : 'Find new candidate companies via the discovery method below, in addition to anything I named.'}`);
+  if(scope === 'find'){
+    lines.push(`- Roughly how many companies to find: ${perCode}`);
+    lines.push(`- Include secondary/adjacent NAICS codes (suppliers, related industries): ${secondary === 'yes' ? 'Yes' : 'No'}`);
+    if(exclude) lines.push(`- Exclude these companies entirely, even if they'd otherwise match: ${exclude}`);
+    lines.push(`- Discovery method — a NAICS code alone is too broad to use as a search filter (the codes that fit niches like this typically cover any IT/consulting business in North America, and SAM.gov's entity search cannot be queried automatically — if you hit that limitation, say so plainly rather than silently substituting something else and calling it a SAM.gov pull). So use NAICS as a supporting/verification layer, not the discovery engine itself:`);
+    lines.push(`  PRIMARY discovery — do these for each company I named above and repeat outward as you find new ones (a "competitor cascade"): (1) search "[company] competitors" and "[company] alternatives" for each named company; (2) check analyst/category sources relevant to the space (e.g. Gartner Magic Quadrant, Forrester Wave, G2/Capterra category pages) for named category leaders; (3) check exhibitor/sponsor lists from relevant industry conferences and trade shows; (4) search live job postings for the kind of role I'm targeting (e.g. "[role keyword] job posting") — this surfaces companies actively hiring in this space and doubles as a real hiring-signal data point instead of a separate guess.`);
+    lines.push(`  NAICS layer — for each company (whether I named it or you found it via the discovery methods above), identify up to 5 NAICS codes total: 1 primary code (the closest single match to its dominant service line) plus up to 4 secondary/adjacent codes. State which keyword or phrase from my industry/company description you used to derive these codes, so I can catch a bad extraction rather than it silently propagating through the list — free-text industry descriptions don't map cleanly to a single code, and getting this wrong early skews everything downstream. Use these codes to (a) sanity-check that a company the cascade surfaced is actually in-category rather than a false-positive adjacent business, and (b) where useful, verify that specific company's own SAM.gov registration/size-standard/set-aside status individually — a single-entity lookup like this is fine even though bulk code-based search is not.`);
+    if(tiered){
+      lines.push(`- Two-tier list: use the discovery method above to build a candidate pool broader than a normal single-tier list would need, then rank the full pool against my stated purpose. The top ${tier1Size} companies become "Tier 1" and get full research — every column listed below. The next ${tier2Size} companies become "Tier 2" and get a lighter research pass — see the separate, shorter Tier 2 column list below. This keeps the overall list genuinely comprehensive without spending full per-company research effort on every single one.`);
+    }
+  }
+  lines.push(`- What this list is for: ${purpose || "Not specified — use general judgment for fit/category/contacts."}`);
+  if(companySize) lines.push(`- Company size filter: only include companies matching "${companySize}" — exclude companies outside this size band.`);
+  if(zip) lines.push(`- Location filter: only include companies headquartered within ${radius} miles of ZIP code ${zip}. Estimate the distance from each company's HQ to this ZIP code and note the approximate mileage as part of the HQ Location / Footprint column.`);
+  if(location) lines.push(`- Preferred location / work arrangement: ${location}`);
+  if(background) lines.push(`- My background (use this to sharpen Suggested Job Title Keywords and Warm Introduction Path — look for former-employer overlap, transferable experience, or relevant credentials): ${background}`);
+
+  if(maEnabled){
+    const angleText = maAngle === 'target'
+      ? "Treat each company as a potential acquisition target for me."
+      : maAngle === 'acquirer'
+      ? "Treat each company as a potential acquirer of a business like mine."
+      : "Rate each company's fit both as a potential acquisition target AND as a potential acquirer.";
+    lines.push(`- M&A research angle: ${angleText} Add Ownership Type, Recent M&A Activity, Signals, Estimated Deal Size Fit, and M&A Role Fit columns. Base this only on public information (news, filings, press releases) — do not treat silence as evidence a company isn't open to a deal.`);
+  }
+
+  lines.push("");
+  lines.push(tieredActive ? `For each Tier 1 company, research and include these columns in the tracker:` : `For each company, research and include these columns in the tracker:`);
+  lines.push(`1. Company — legal/common name`);
+  lines.push(`2. Website`);
+  lines.push(`3. Careers Page — a direct link to this company's careers/jobs listing page specifically (e.g. "acme.com/careers" or their Workday/Greenhouse/Lever posting board), not just the homepage. Leave blank if you can't find one rather than guessing at a URL pattern`);
+  lines.push(`4. Industry / Sector`);
+  lines.push(`5. Industry Emphasized — the specific niche, vertical, or market segment this company emphasizes within that broader sector (e.g. "cloud security for financial services" rather than just "cybersecurity")`);
+  lines.push(`6. NAICS Code(s) — up to 5 total: the 1 primary code plus up to 4 secondary/adjacent codes (see the discovery method note above) — list them together in this cell, primary first`);
+  lines.push(`7. NAICS Code Type — Primary or Secondary (for the first/lead code listed in the cell above)`);
+  lines.push(`8. Why This NAICS Code — one line connecting the code(s) back to my starting point, including the keyword/phrase you used to derive them so I can sanity-check the extraction`);
+  lines.push(`9. HQ Location / Footprint — city, state/country, and whether local, regional, or global`);
+  lines.push(`10. Company Size — employee count band`);
+  lines.push(`11. Revenue Band / Latest Revenue — most recent public figure or reasonable estimate, with source/year noted`);
+  lines.push(`12. Growth / Revenue Signal — High/Medium/Low plus a brief note on what's driving it`);
+  lines.push(`13. Hiring Signal — High/Medium/Low plus a brief note, inferred from overall business trajectory (revenue growth, expansion announcements, funding rounds, earnings commentary) and how that connects to my stated purpose — an indirect signal, not a job-posting count`);
+  lines.push(`14. Recent Hiring Trends — High/Medium/Low based on actual current job postings for this company (check LinkedIn Jobs, Indeed, or the company's own careers page) as of today (${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}) — High = many open roles posted right now, Medium = some open roles, Low = few or no open roles found. This is a direct, concrete snapshot, separate from the broader Hiring Signal above`);
+  lines.push(`15. Salary Range (if posted) — while checking job postings for the Recent Hiring Trends column above, note the salary range if any posting discloses one (many now do, due to state pay-transparency laws), along with the job title it's attached to (e.g. "$140K-$170K — Sr. OT Security Engineer posting"). Leave blank if no posting discloses a range — don't estimate or infer a figure`);
+  lines.push(`16. Opportunity Relevance — rate High/Medium/Low with a short note on how relevant this company is to my stated purpose, whatever that purpose is (job search, sales, partnerships, M&A, etc.)`);
+  lines.push(`17. Opportunity Fit — High/Medium/Low, how well this company fits my stated purpose overall`);
+  lines.push(`18. Category — group companies usefully for my stated purpose`);
+  lines.push(`19. Why This Fits — 1-2 sentence rationale connecting the company to my stated purpose`);
+  lines.push(`20. Executive Role Fit — the level/title most relevant to approach or target at this company for my purpose (e.g. Partner, Managing Director, Practice Lead, VP, Chief Consultant), based on how the company is structured`);
+  lines.push(`21. Warm Introduction Path — the most plausible path to a warm introduction at this company (e.g. recruiter, executive search firm, former colleagues, LinkedIn 2nd-degree connection, conference/industry contacts), inferred from the company's profile and my background if I've shared it`);
+  lines.push(`22. Outreach Approach — brief guidance on how and through whom to approach this company`);
+  lines.push(`23. Key Contacts / Priority Titles — named individuals if publicly findable, otherwise closest equivalent titles. Additionally, for publicly traded companies only, check the most recent 10-K's cybersecurity governance disclosure (Item 1C / Regulation S-K Item 106) for a named CISO, CIO, CTO, or similarly responsible officer. If one is named there, add it as a clearly labeled second line: "(per FY20XX 10-K)" — this is a different kind of data point than the practice-level contact above (sourced from a filing, not inferred), so keep it visually distinct rather than blending the two. If the company is public but the 10-K doesn't name anyone (common — many disclosures describe the role without naming the person), add a brief note saying so rather than omitting silently. If the company is privately held and doesn't file a 10-K at all, skip this entirely — don't add a "not applicable" line for the obvious case.`);
+  lines.push(`24. Compensation Benchmark — for publicly traded companies only: if the individual named from the 10-K in column 23 also appears in that company's most recent proxy statement (DEF 14A) Summary Compensation Table as a Named Executive Officer, report their total compensation figure with the fiscal year noted (e.g. "$2.1M total comp, FY2025 proxy"). This will genuinely apply to a minority of companies — security-specific roles like CISO are rarely among the top 5 highest-paid executives a proxy discloses, so most rows will legitimately have nothing here. When that's the case, say so briefly ("not a Named Executive Officer — not disclosed") rather than leaving the cell ambiguously blank, and don't substitute a generic market-rate guess dressed up as filing data. Skip entirely for private companies, same as column 23.`);
+  lines.push(`25. Suggested Search Keywords — terms useful for a LinkedIn people-search (finding the right person at this company)`);
+  lines.push(`26. Suggested Job Title Keywords — 2-4 actual job title variants this specific company would plausibly use in a job posting for the Executive Role Fit identified above (e.g. not a generic title — the title format this company itself tends to use), meant for searching job postings/boards rather than searching for people${background ? ", informed by my background above where relevant" : ""}`);
+  lines.push(`27. Source URL — link(s) supporting the data above`);
+  lines.push(`28. Priority Score — leave blank for me to fill in`);
+  lines.push(`29. Status — leave blank (Not Started / Researching / Contacted / In Progress / Closed)`);
+  lines.push(`30. Next Action — leave blank`);
+  lines.push(`31. Date Researched — today's date`);
+  if(maEnabled){
+    lines.push(`32. Ownership Type — founder-owned, PE-backed, public, subsidiary`);
+    lines.push(`33. Recent M&A Activity`);
+    lines.push(`34. Signals — sale/succession signals or acquisition-appetite signals depending on angle above`);
+    lines.push(`35. Estimated Deal Size Fit`);
+    lines.push(`36. M&A Role Fit — Likely Acquisition Target / Likely Acquirer / Could Be Either / Unclear`);
+  }
+  lines.push("");
+  if(tieredActive){
+    lines.push(`For each Tier 2 company, research and include only this shorter set of columns — skip the deeper lookups (careers page verification, job-posting/hiring checks, salary data, 10-K/proxy research, named contacts, keyword generation). The goal for Tier 2 is enough to judge fit and know who they are, not exhaustive detail:`);
+    lines.push(`1. Company — legal/common name`);
+    lines.push(`2. Website`);
+    lines.push(`3. Industry / Sector`);
+    lines.push(`4. NAICS Code(s) — primary code plus any secondary codes found, up to 5 total, primary first`);
+    lines.push(`5. NAICS Code Type — Primary or Secondary (for the first/lead code listed)`);
+    lines.push(`6. HQ Location / Footprint — city, state/country`);
+    lines.push(`7. Company Size — employee count band, best available estimate`);
+    lines.push(`8. Opportunity Fit — High/Medium/Low only, no supporting rationale needed`);
+    lines.push(`9. Category — same grouping logic used for Tier 1, for consistency`);
+    lines.push(`10. Source URL`);
+    lines.push("");
+    lines.push(`Output structure for the two-tier list: put Tier 1 companies in a tab named "Tier 1 - Priority Targets" (the full column set above, with all formatting rules below applied) and Tier 2 companies in a separate tab named "Tier 2 - Extended List" (the slim column set just above, plain data — autofilter is fine, but skip the rating-color gradient and Suggested Priority Rank formula since Tier 2 doesn't have the underlying rating columns those depend on). Any tabs below that pull from "the main tracker" (Job Posting Quick Links, Job Post Finder, Outreach Contacts) should pull from Tier 1 only, since they depend on Tier-1-only columns like Suggested Job Title Keywords and Key Contacts / Priority Titles.`);
+    lines.push(`Both tabs are required output, not optional — do not deliver a workbook where "Tier 2 - Extended List" is empty, header-only, or missing. Budget your effort accordingly: Tier 2's column set is deliberately short specifically so you have room to actually populate all ${tier2Size} of those rows after finishing Tier 1's deeper research, not so you can skip it.`);
+    lines.push("");
+  }
+  if(formatting){
+    lines.push(`Formatting requirements for the Excel file — apply all of these:`);
+    lines.push(`- Color-code these five rating columns using a 5-step gradient keyed to the leading word of each cell: Growth / Revenue Signal, Hiring Signal, Recent Hiring Trends, Opportunity Relevance, Opportunity Fit. Very High = darker green (A9D8A9), High = green (C6E8C6), Medium-High = yellow-green (E2EFC0), Medium = yellow (FFF2B2), Low-Medium = orange (FBDCB8), Low = red (F4C7C3).`);
+    lines.push(`- Add a "Suggested Priority Rank (1 = top priority)" column positioned immediately next to the blank Priority Score column. First compute an underlying score per company, used only as a sort key, never displayed: convert each rating word to points (Very High=5, High=4, Medium-High=3.5, Medium=3, Low-Medium=2, Low=1), then score = (Opportunity Fit points x 2) + (Opportunity Relevance points x 2) + average(Growth/Revenue Signal points, Hiring Signal points, Recent Hiring Trends points). Sort every company by that score, highest first, breaking any ties by Opportunity Fit (Very High > High > Medium-High > Medium > Low-Medium > Low) and then alphabetically by Company name. Assign whole-number ranks in that order starting at 1 for the single best-fit company, with no ties and no decimals, through however many companies are in this list. The cell shows only the rank number — never the underlying score. Color this column using the same gradient, bucketed by position in the ranked list rather than by score: the top fifth of companies get Very High, the next fifth High, the next fifth Medium-High, the next fifth Medium, and the rest Low. Add a cell comment on this column's header noting it's a mechanical ranking based on the formula above, not a replacement for my own judgment, and that I should compare it against my own Priority Score.`);
+    lines.push(`- Hyperlink the Website and Careers Page columns so each cell links to that company's actual site/careers page. Leave Source URL as plain text (those cells are often citation notes, not single clean links).`);
+    lines.push(`- Add autofilter on the header row. Freeze both the header row and the Company column so they stay visible while scrolling.`);
+    lines.push(`- Lightly shade alternating data rows (zebra striping) for readability, without overriding the rating-column colors above.`);
+    lines.push(`- Give the Priority Score, Status, and Next Action columns (the ones I fill in by hand) a distinct light fill and border, separate from the rating gradient, so it's visually clear which columns are your research versus my own input.`);
+    lines.push(`- Add a "Notes & Assumptions" tab: document which figures are verified vs. estimated, list key assumptions (like how you interpreted an unstated purpose), and include a color legend explaining the gradient above.`);
+    lines.push(`- Add a "Summary" tab: counts of companies by Opportunity Fit, by NAICS Code Type, and by Category, plus a "Top 5 by Suggested Priority Rank" table.`);
+    lines.push("");
+  }
+  if(quickLinks){
+    lines.push(`Also add a "Job Posting Quick Links" tab — one row per company, with these columns:`);
+    lines.push(`- Company`);
+    lines.push(`- Job Title Used for Search — the single most likely job title for this company (pull just the first variant out of Suggested Job Title Keywords, not the whole multi-title cell — a focused single-title search works better than one crammed with 3-4 titles at once). If Suggested Job Title Keywords is "N/A" for this company (e.g. a current/internal-only row), use a generic fallback like the industry/purpose keyword instead so the link still works.`);
+    lines.push(`- LinkedIn Jobs Search, Indeed Search, Google Jobs Search — three separate HYPERLINK() formulas per row`);
+    lines.push(`Use exactly this formula pattern (tested and confirmed working — note the _xlfn. prefix on ENCODEURL, which Excel requires when this function is written programmatically; omitting it produces a #NAME? error), referencing that row's own Company (column A) and Job Title Used for Search (column B) cells on this tab:`);
+    lines.push(`  LinkedIn: =HYPERLINK("https://www.linkedin.com/jobs/search/?keywords="&_xlfn.ENCODEURL(A2)&"%20"&_xlfn.ENCODEURL(B2),"Search LinkedIn")`);
+    lines.push(`  Indeed: =HYPERLINK("https://www.indeed.com/jobs?q="&_xlfn.ENCODEURL(B2)&"+"&_xlfn.ENCODEURL(A2),"Search Indeed")`);
+    lines.push(`  Google Jobs: =HYPERLINK("https://www.google.com/search?q="&_xlfn.ENCODEURL(A2)&"+"&_xlfn.ENCODEURL(B2)&"+jobs","Search Google Jobs")`);
+    lines.push(`(Adjust the row number in each formula to match its own row.) These reference this tab's own cells, not the main sheet, so the tab works standalone and the links update automatically if I edit the Company or Job Title cell later.`);
+    lines.push(`Critical — these must be real, working links, not broken text: do NOT substitute LinkedIn's hashtag/feed URL (linkedin.com/feed/hashtag/...) for the jobs-search URL given above — that's a different LinkedIn feature and will not return job postings. Do NOT write these as Markdown link syntax like [Search LinkedIn](https://...) — Excel does not render Markdown, so that syntax shows up as broken literal text in the cell instead of a clickable link. Each cell must contain a real Excel formula starting with =HYPERLINK(, not a text label styled to look like one. If you're building this file programmatically (e.g. with openpyxl), set the cell's value directly to the formula string starting with "=HYPERLINK(" rather than wrapping it in Markdown brackets or treating it as display text. Before finishing, open and check a sample of the LinkedIn/Indeed/Google Jobs cells to confirm they're clickable and land on the correct search-results page for that company and title.`);
+    lines.push(`Important — be explicit about what this tab is and isn't: it is a set of pre-built search links, nothing more. Each link just opens LinkedIn, Indeed, or Google with the company name and a job title already typed into the search box for me — the same as if I'd typed them in myself. Clicking a link does not pull in, list, or embed any actual job postings, and nothing here is "unique jobs found" — it's a shortcut to go run that search, every time, live, whenever I click it. Say this plainly in the file itself (e.g. in the tab's notes or the main Notes tab), not just in your reply to me.`);
+    lines.push("");
+  }
+  if(jobFinder){
+    lines.push(`Also add a "Job Post Finder" tab — separate from the Job Posting Quick Links tab above, and much simpler: plain reference data, not links or formulas. Exactly two columns:`);
+    lines.push(`- Column A: Company Name — same value as the Company column on the main tracker`);
+    lines.push(`- Column B: Suggested Job Title Keywords — the full value from the main tracker's Suggested Job Title Keywords column, all 2-4 title variants included, not reduced to a single title`);
+    lines.push(`One row per company, same order as the main tracker, header row on row 1. No HYPERLINK() formulas, no job-board-specific columns, nothing clickable — just the two columns side by side. The point is for me to be able to select a company's row, copy the company name and its keyword variants, and paste them into whatever job board or search engine I want to check manually, rather than being limited to the three platforms the Quick Links tab is hardcoded to.`);
+    lines.push("");
+  }
+  if(outreachContacts){
+    lines.push(`Also add an "Outreach Contacts" tab — plain reference data, not links or formulas, feeding a separate companion tool (Outreach Message Builder). Exactly four columns, in this exact order:`);
+    lines.push(`- Column A: Company — same value as the Company column on the main tracker`);
+    lines.push(`- Column B: Key Contacts / Priority Titles — same value as the main tracker's Key Contacts / Priority Titles column`);
+    lines.push(`- Column C: Warm Introduction Path — same value as the main tracker's Warm Introduction Path column`);
+    lines.push(`- Column D: Category — same value as the main tracker's Category column`);
+    lines.push(`One row per company, same order as the main tracker, header row on row 1. These four columns aren't adjacent on the main sheet, so this tab exists purely to put them side by side — no new research, just a reformatted copy of data already generated above. The point is for me to be able to select this whole block and paste it directly into the Outreach Message Builder's bulk-paste box, which expects exactly these four columns, in this exact order, tab-separated.`);
+    lines.push("");
+  }
+  if(events){
+    const windowLabel = eventsWindow === '6' ? 'the next 6 months' : eventsWindow === 'any' ? 'any upcoming date (no cutoff)' : 'the next 12 months';
+    lines.push(`Also add an "Industry Events & Forums" tab — one row per event, not per company, since the same event is often relevant to several companies on my list at once. Columns:`);
+    lines.push(`- Event Name`);
+    lines.push(`- Date(s)`);
+    lines.push(`- Location`);
+    lines.push(`- Format — In-person / Virtual / Hybrid`);
+    lines.push(`- Relevant To — reuse the values from the main sheet's Category column (not a separate taxonomy), so this tab stays connected to however the companies are already grouped there`);
+    lines.push(`- URL`);
+    lines.push(`Only include real, currently findable conferences, trade shows, or industry forums relevant to my stated industry/purpose, scoped to ${windowLabel}. Same honesty standard as the rest of this request: only report events you actually find via search with a real URL, do not fabricate or guess at an event that "probably exists" for this industry, and report fewer events rather than padding the list. If you can't find good coverage for a given Category, say so rather than inventing something to fill the gap.`);
+    lines.push("");
+  }
+  if(companyEvents){
+    const cWindowLabel = companyEventsWindow === '30' ? 'the last 30 days' : companyEventsWindow === '180' ? 'the last 6 months' : 'the last 90 days';
+    lines.push(`Also add a "Company Activity & Events" tab — one row per COMPANY (not per event, unlike the Industry Events tab above), tracking each company's own public activity and event footprint. Columns:`);
+    lines.push(`- Company`);
+    lines.push(`- Recent LinkedIn Activity — notable posts, announcements, or updates from ${cWindowLabel}, with date and a one-line summary`);
+    lines.push(`- Podcast / Webcast Appearances — company leadership appearing on a podcast, or the company hosting/participating in a webcast, with date, title, and link`);
+    lines.push(`- Upcoming Events / Tradeshows — conferences, tradeshows, or in-person/virtual events this company is attending, sponsoring, or speaking at`);
+    lines.push(`- Source URL(s)`);
+    lines.push(`Search each company individually and from a few different angles before concluding there's nothing — don't rely on a single generic search. For each company, try at minimum: (1) the company's own LinkedIn company page directly, not just a general web search of its name, (2) "[company name] podcast" and "[company name] webinar" or "webcast", and (3) "[company name] conference 2026" or "[company name] speaking OR sponsoring OR exhibiting". Only after checking these specifically should you conclude there's nothing findable for that company.`);
+    lines.push(`This is inherently uneven across companies -- some will have a rich public footprint, many will have little to nothing findable, and that's expected. Same honesty standard as the rest of this request: only report activity you can verify via search with a real, working URL and date. If you can't find meaningful recent activity for a company after the checks above, write "No recent public activity found" rather than fabricating a LinkedIn post, podcast appearance, or event that doesn't actually exist. If most or all companies come back with "No recent public activity found," say so plainly in the Notes tab rather than letting an empty-looking tab speak for itself — note briefly what was searched, so I know it was actually checked rather than skipped.`);
+    lines.push("");
+  }
+  if(tieredActive){
+    lines.push(`Before you finish and hand back the file, confirm both tiers are actually present and populated: "Tier 1 - Priority Targets" should have all ${tier1Size} companies with every Tier 1 column filled in, and "Tier 2 - Extended List" should separately have its own ${tier2Size} companies (distinct from Tier 1, not a repeat of them) with the lighter Tier 2 column set filled in. A run that stops after Tier 1 and leaves Tier 2 empty or missing has not completed this task. If effort or time constraints genuinely mean you can't research the full counts requested, shrink both tiers proportionally rather than dropping Tier 2 to zero, and say so plainly in your reply — don't silently ship a Tier 1-only file.`);
+    lines.push("");
+  }
+  lines.push(`Format the result as a clean, formatted Excel workbook (.xlsx) with a header row, reasonable column widths, and one row per company. Don't fabricate figures — mark estimates clearly and leave anything unverifiable blank rather than guessing.`);
+
+  return lines.join("\n");
+}
+
+const companiesCountHintEl = document.getElementById('companiesCountHint');
+const companiesBaseHint = companiesCountHintEl ? companiesCountHintEl.textContent : '';
+
+function updateCompaniesCountHint(){
+  if(!companiesCountHintEl) return;
+  const raw = val('companies');
+  if(!raw){ companiesCountHintEl.textContent = companiesBaseHint; return; }
+  const count = raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean).length;
+  if(count > 50){
+    companiesCountHintEl.textContent = `${count} companies listed — that's well past what a single chat prompt handles well. Consider Anthropic's dedicated Research feature for a list this size, or split this into smaller batches.`;
+  } else if(count > 20){
+    companiesCountHintEl.textContent = `${count} companies listed — the cascade (roughly 2+ searches per seed, before expansion) will run noticeably slower past this point. Still workable, just slower.`;
+  } else {
+    companiesCountHintEl.textContent = companiesBaseHint;
+  }
+}
+
+function render(){
+  const prompt = buildPrompt();
+  if(prompt === null){
+    promptTextEl.innerHTML = '<span id="placeholder">Fill in at least one starting-point field or a purpose to see your prompt appear here.</span>';
+  } else {
+    promptTextEl.textContent = prompt;
+  }
+  updateCompaniesCountHint();
+}
+
+// --- Section 2: Bulk Company Pull ---
+const bulkPromptTextEl = document.getElementById('bulkPromptText');
+
+function buildBulkPrompt(){
+  const companies = val('companies');
+  const industry = val('industry');
+  const naics = val('naics');
+  const exclude = val('excludeCompanies');
+  const companySize = val('companySize');
+  const zip = val('zipCode');
+  const radius = val('radiusMiles') || '100';
+  const bulkSize = val('bulkSize') || '75-100';
+
+  const haveStart = companies || industry || naics;
+  if(!haveStart) return null;
+
+  let lines = [];
+  lines.push(`Please execute this task directly — research and build the actual file now, rather than first describing your plan, summarizing what you're about to do, or offering recommendations about how to proceed. If a genuine capability limitation prevents you from completing part of this, say so plainly and do as much as you actually can — but don't pause to ask permission, outline an approach, or check in before starting the real work.`);
+  lines.push("");
+  lines.push(`I want a fast, wide, low-detail list of candidate companies — NOT full research. This is a bulk discovery pass I'll prune by hand afterward, so keep each company cheap: no deep verification, no per-company career-page/job-posting/filing checks, just enough to recognize and sort. Here's what I have:`);
+  lines.push("");
+  if(companies) lines.push(`- Company/companies I already know (use these as seeds for discovery, and include them in the output too): ${companies}`);
+  if(industry) lines.push(`- Industry / field (plain language): ${industry}`);
+  if(naics) lines.push(`- NAICS code(s) I already know: ${naics}`);
+  if(exclude) lines.push(`- Exclude these companies entirely, even if they'd otherwise match: ${exclude}`);
+  if(companySize) lines.push(`- Company size filter: only include companies matching "${companySize}" — exclude companies outside this size band, best effort, don't spend heavy research confirming exact headcount`);
+  if(zip) lines.push(`- Location filter: only include companies headquartered within ${radius} miles of ZIP code ${zip}, best effort`);
+  lines.push(`- Target list size: ${bulkSize} — go this wide since there's no per-company deep research cost here. If the seed/industry genuinely can't support this many distinct real companies, say so and give me what you can actually find rather than padding the list with weak or duplicate matches.`);
+  lines.push("");
+  lines.push(`Discovery method — do NOT rely on NAICS codes as the search mechanism; a code alone is far too broad to use as a filter (it would return any IT/consulting business in North America) and there is no bulk, robots-allowed public source that returns "every company under code X" (SAM.gov's search blocks automated access; Census.gov has no company directory, only code definitions). Instead, discover companies via:`);
+  lines.push(`  1. Competitor/alternative cascade — for each seed company I named, search "[company] competitors" and "[company] alternatives," and repeat outward for companies you find this way too.`);
+  lines.push(`  2. Analyst & category sources — Gartner Magic Quadrant / Forrester Wave entries, G2/Capterra category pages, or equivalent category-leader lists relevant to this space.`);
+  lines.push(`  3. Conference exhibitor/sponsor lists — relevant industry conferences and trade shows often publish exhibitor or sponsor lists that are a strong signal for "real company actively in this space."`);
+  lines.push(`  4. Live job-posting search — searching for the kind of role tied to my industry/purpose surfaces companies actively hiring in this space.`);
+  lines.push(`NAICS codes are a tag applied AFTER a company is found this way, not a search filter: for each company, do a quick best-guess single NAICS code (don't spend real research effort verifying it — if you can't confidently guess one, leave it blank rather than forcing a wrong code). If you have live access to a NAICS-filterable data source that's actually queryable in this context (for example the free, public USASpending.gov API, which returns real federal-contract-recipient company names filtered by NAICS code, unlike SAM.gov's blocked search UI), you may use it as one more discovery channel — but note plainly which companies came from it if so, since it only covers companies with a federal-contracting footprint and will miss most private-sector-only firms.`);
+  lines.push("");
+  lines.push(`For each company, include only these columns — flat data, no research beyond what's needed to fill these in:`);
+  lines.push(`1. Company — legal/common name`);
+  lines.push(`2. Website`);
+  lines.push(`3. Inferred NAICS Code — single best-guess code, or blank if you can't confidently guess one`);
+  lines.push(`4. What They Do — one line, plain language`);
+  lines.push(`5. Source — the search/page that surfaced this company, so I can spot-check quality`);
+  lines.push("");
+  lines.push(`Format the result as a plain Excel workbook (.xlsx) — a header row, one row per company, reasonable column widths. No color-coding, no formulas, no extra tabs, no scoring — this is meant to be scanned and pruned quickly in Excel, not a finished deliverable. Once I've deleted the rows I don't want, I'll paste the Company column from what's left into a separate follow-up prompt for full research on just those companies.`);
+
+  return lines.join("\n");
+}
+
+function bulkRender(){
+  const prompt = buildBulkPrompt();
+  if(prompt === null){
+    bulkPromptTextEl.innerHTML = '<span id="bulkPlaceholder">Fill in at least one Shared Input above (company, industry, or NAICS code) to see this prompt appear here.</span>';
+  } else {
+    bulkPromptTextEl.textContent = prompt;
+  }
+}
+
+document.getElementById('copyBulkBtn').addEventListener('click', () => {
+  const prompt = buildBulkPrompt();
+  if(!prompt) return;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const btn = document.getElementById('copyBulkBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    alert('Clipboard blocked by your browser — use the Download .txt button instead.');
+  });
+});
+
+document.getElementById('downloadBulkBtn').addEventListener('click', () => {
+  const prompt = buildBulkPrompt();
+  if(!prompt) return;
+  const blob = new Blob([prompt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bulk_company_pull_prompt.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+function renderAll(){
+  render();
+  bulkRender();
+}
+
+document.querySelectorAll('input, textarea').forEach(el => {
+  el.addEventListener('input', renderAll);
+  el.addEventListener('change', renderAll);
+});
+document.querySelectorAll('input[name="maEnabled"]').forEach(el => {
+  el.addEventListener('change', toggleMaAngleField);
+});
+document.querySelectorAll('input[name="tiered"]').forEach(el => {
+  el.addEventListener('change', toggleTierFields);
+});
+document.querySelectorAll('input[name="scope"]').forEach(el => {
+  el.addEventListener('change', toggleScopeFields);
+});
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const prompt = buildPrompt();
+  if(!prompt) return;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    alert('Clipboard blocked by your browser — use the Download .txt button instead.');
+  });
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const prompt = buildPrompt();
+  if(!prompt) return;
+  const blob = new Blob([prompt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'target_company_research_prompt.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(!confirm('Clear all fields on the form?')) return;
+  document.querySelectorAll('input[type=text], textarea').forEach(el => el.value = '');
+  document.getElementById('radiusMiles').value = '100';
+  document.getElementById('tier1Size').value = '25';
+  document.getElementById('tier2Size').value = '75';
+  document.querySelector('input[name="scope"][value="find"]').checked = true;
+  document.querySelector('input[name="secondary"][value="yes"]').checked = true;
+  document.querySelector('input[name="tiered"][value="no"]').checked = true;
+  document.querySelector('input[name="maEnabled"][value="no"]').checked = true;
+  document.querySelector('input[name="maAngle"][value="target"]').checked = true;
+  document.querySelector('input[name="formatting"][value="yes"]').checked = true;
+  document.querySelector('input[name="quickLinks"][value="yes"]').checked = true;
+  document.querySelector('input[name="jobFinder"][value="yes"]').checked = true;
+  document.querySelector('input[name="outreachContacts"][value="yes"]').checked = true;
+  document.querySelector('input[name="events"][value="yes"]').checked = true;
+  document.querySelector('input[name="eventsWindow"][value="12"]').checked = true;
+  document.querySelector('input[name="companyEvents"][value="no"]').checked = true;
+  document.querySelector('input[name="companyEventsWindow"][value="90"]').checked = true;
+  document.getElementById('bulkSize').value = '75-100';
+  toggleMaAngleField();
+  toggleScopeFields();
+  render();
+  bulkRender();
+});
+
+toggleScopeFields();
+render();
+bulkRender();
+
+// --- Step 2: LinkedIn Contact Enrichment (separate, standalone prompt) ---
+const enrichPromptTextEl = document.getElementById('enrichPromptText');
+const enrichCountHintEl = document.getElementById('enrichCountHint');
+
+function buildEnrichPrompt(){
+  const raw = val('enrichCompanies');
+  const list = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  if(list.length === 0) return null;
+
+  let lines = [];
+  lines.push(`Please execute this task directly — match now, rather than describing your plan first or asking permission. I'm attaching a CSV export of my LinkedIn contacts to this message. If you don't have a way to read the attached file, say so plainly and stop rather than guessing at contacts.`);
+  lines.push("");
+  lines.push(`Cross-reference my attached LinkedIn contacts CSV against this list of target companies, to help me find warm introduction paths:`);
+  lines.push("");
+  list.forEach(c => lines.push(`- ${c}`));
+  lines.push("");
+  lines.push(`For each target company above, check my attached CSV for contacts whose Company/Employer field matches that company — including a clear variant of it (subsidiary, former name, common abbreviation, parent/holding company). For each match found, report:`);
+  lines.push(`- Company — from my list above`);
+  lines.push(`- Matched Contact Name`);
+  lines.push(`- Contact's Title — as listed in the CSV`);
+  lines.push(`- Contact's LinkedIn Profile URL — if present in the CSV`);
+  lines.push(`- Current or Former — note if the CSV or context suggests this is a past employer for that contact; a former employee can still be a useful warm intro, but it's a different kind of connection than someone there now, so don't blend the two`);
+  lines.push(`- Match Confidence — High (exact company name match), Medium (clear variant/subsidiary match), or Low (plausible but uncertain, e.g. a similar name or ambiguous abbreviation)`);
+  lines.push("");
+  lines.push(`If a target company has no matching contact in my CSV, still include it in the results with "No match found" rather than omitting it, so I can see coverage across my full list. This only works with what's actually in the file I attached — don't fabricate a contact, and don't guess someone into a company they aren't actually listed against in the CSV.`);
+  lines.push("");
+  lines.push(`Format the result as a formatted Excel workbook (.xlsx) — or, if you can't create a file in this context, a clearly organized table in your reply — with one row per matched contact, grouped by company. This is a standalone follow-up step; it doesn't rebuild or modify any tracker from a separate conversation.`);
+  lines.push("");
+  lines.push(`Also add a second tab to the same workbook named exactly "Outreach Msg." This tab is built to be copied and pasted straight into my Outreach Message Builder tool, which parses each pasted row on its own, so its layout matters more than its looks. It has exactly three columns, in this order, with this header row: column A "Company Name," column B "Name," column C "Title." One row per matched contact, using the same contacts and order as the main tab. Put the company name on every single row — if a company has three matched contacts, that's three rows that each start with the company name; never merge cells or leave Company Name blank on a second or third row for the same company. Name is the contact's full name as listed in the CSV. Title is the contact's title as listed in the CSV; if the match is a former employee, add " (former employee)" after the title so the distinction isn't lost. Leave out any company marked "No match found" — this tab lists only real, named contacts. Keep it plain: no merged cells, no line breaks inside a cell, no formulas or hyperlinks, no blank rows or company group headers between rows, and no extra columns. If you're replying with tables instead of a file, give this as a separate plain three-column table with the same rules.`);
+
+  return lines.join("\n");
+}
+
+function enrichRender(){
+  const raw = val('enrichCompanies');
+  const list = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  const prompt = buildEnrichPrompt();
+  if(prompt === null){
+    enrichPromptTextEl.innerHTML = '<span id="enrichPlaceholder">Paste your top 25 companies from the Target Company spreadsheet above to see this prompt appear here.</span>';
+  } else {
+    enrichPromptTextEl.textContent = prompt;
+  }
+  if(list.length > 25){
+    enrichCountHintEl.textContent = `${list.length} companies listed — that's above the recommended 25. Matching will run slower and match quality may suffer; consider trimming to your top targets or splitting into a couple of batches.`;
+  } else if(list.length > 0){
+    enrichCountHintEl.textContent = `${list.length} compan${list.length === 1 ? 'y' : 'ies'} listed.`;
+  } else {
+    enrichCountHintEl.textContent = '';
+  }
+}
+
+document.getElementById('enrichCompanies').addEventListener('input', enrichRender);
+
+document.getElementById('copyEnrichBtn').addEventListener('click', () => {
+  const prompt = buildEnrichPrompt();
+  if(!prompt) return;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const btn = document.getElementById('copyEnrichBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    alert('Clipboard blocked by your browser — use the Download .txt button instead.');
+  });
+});
+
+document.getElementById('downloadEnrichBtn').addEventListener('click', () => {
+  const prompt = buildEnrichPrompt();
+  if(!prompt) return;
+  const blob = new Blob([prompt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'linkedin_contact_enrichment_prompt.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+enrichRender();
+
+// --- Section 4: Department Contact Finder (separate, standalone prompt) ---
+const deptPromptTextEl = document.getElementById('deptPromptText');
+const deptCountHintEl = document.getElementById('deptCountHint');
+const DEPT_COMPANY_CAP = 15;
+
+function buildDeptPrompt(){
+  const raw = val('deptCompanies');
+  const list = raw.split('\n').map(s => s.trim()).filter(Boolean).slice(0, DEPT_COMPANY_CAP);
+  const role = val('deptRole');
+  const adjacent = radioVal('deptAdjacent') === 'no' ? 'No' : 'Yes';
+  if(list.length === 0 || !role) return null;
+
+  let lines = [];
+  lines.push(`Please execute this task directly using web search — search now, rather than describing your plan first or asking permission.`);
+  lines.push("");
+  lines.push(`I'm researching named individuals at specific companies who work in or near a target department/role, to identify potential networking contacts. This should use live web search (LinkedIn profiles, company team/leadership pages, press releases, case studies, job postings) — not your training data alone, since roles and org structures change.`);
+  lines.push("");
+  lines.push(`Target role/department: ${role}`);
+  lines.push("");
+  lines.push(`Target companies (one per line):`);
+  list.forEach(c => lines.push(`- ${c}`));
+  lines.push("");
+  lines.push(`Include adjacent teams: ${adjacent}`);
+  lines.push("");
+  lines.push(`For each target company, search for named individuals whose title or team matches the target role/department, using this tiering:`);
+  lines.push(`- Tier 1 (Exact): title or team name matches the target role/department directly.`);
+  lines.push(`- Tier 2 (Adjacent): same general practice area, broader scope than the target.`);
+  lines.push(`- Tier 3 (Umbrella): parent practice or risk/functional area likely overseeing the target area.`);
+  lines.push("");
+  if(adjacent === 'No'){
+    lines.push(`Include adjacent teams is set to No — return Tier 1 exact matches only. If a company has no Tier 1 matches, say so rather than substituting a lower tier.`);
+  } else {
+    lines.push(`Include adjacent teams is set to Yes — return Tier 1 first for each company, then include Tier 2 and Tier 3 matches when Tier 1 is thin or empty, always labeled clearly with their tier. Never blend tiers without marking them.`);
+  }
+  lines.push("");
+  lines.push(`For each match found, report: Company, Matched Person's Name, Title, Department/Team (as stated in the source), Match Tier, Source (e.g. LinkedIn profile, company page, case study, press release), and a Confidence rating (High/Medium/Low) reflecting how directly the source confirms current department membership. Never fabricate a name, title, or team — if you cannot confirm a detail, state that explicitly rather than guessing.`);
+  lines.push("");
+  lines.push(`If a target company has no usable public results, still include it as "No public matches found" rather than omitting it.`);
+  lines.push("");
+  lines.push(`Format the result as a formatted Excel workbook (.xlsx) — or a clearly organized table in your reply if you can't create a file — with one row per matched person, grouped by company and sorted by tier. This is a standalone task; it doesn't rebuild or modify any tracker from a separate conversation, but the columns are laid out so the rows can be pasted directly into a tracker's "Key Contacts / Priority Titles" column afterward.`);
+  lines.push("");
+  lines.push(`Also add a second tab to the same workbook named exactly "Outreach Msg." This tab is built to be copied and pasted straight into my Outreach Message Builder tool, which parses each pasted row on its own, so its layout matters more than its looks. It has exactly three columns, in this order, with this header row: column A "Company Name," column B "Name," column C "Title." One row per matched person, using the same people and order as the main tab (grouped by company, sorted by tier). Put the company name on every single row — if a company has three matched people, that's three rows that each start with the company name; never merge cells or leave Company Name blank on a second or third row for the same company. Name is the person's full name and Title is their title as stated in the source — the same values as the main tab, with no tier, source, or confidence notes mixed in. Leave out any company marked "No public matches found," and any row where you couldn't confirm a real name — this tab lists only real, named people. Keep it plain: no merged cells, no line breaks inside a cell, no formulas or hyperlinks, no blank rows or company group headers between rows, and no extra columns. If you're replying with tables instead of a file, give this as a separate plain three-column table with the same rules.`);
+
+  return lines.join("\n");
+}
+
+function deptRender(){
+  const rawList = val('deptCompanies').split('\n').map(s => s.trim()).filter(Boolean);
+  const prompt = buildDeptPrompt();
+  if(prompt === null){
+    deptPromptTextEl.innerHTML = '<span id="deptPlaceholder">Fill in your target companies and a target role/department above to see this prompt appear here.</span>';
+  } else {
+    deptPromptTextEl.textContent = prompt;
+  }
+  if(rawList.length > DEPT_COMPANY_CAP){
+    deptCountHintEl.textContent = `${rawList.length} companies listed — only the first ${DEPT_COMPANY_CAP} will be included. This task runs a live search per company/role pair, so it's capped lower than Section 3; trim the list or split into batches for more.`;
+  } else if(rawList.length > 0){
+    deptCountHintEl.textContent = `${rawList.length} compan${rawList.length === 1 ? 'y' : 'ies'} listed.`;
+  } else {
+    deptCountHintEl.textContent = '';
+  }
+}
+
+document.getElementById('deptCompanies').addEventListener('input', deptRender);
+document.getElementById('deptRole').addEventListener('input', deptRender);
+document.querySelectorAll('input[name="deptAdjacent"]').forEach(el => {
+  el.addEventListener('change', deptRender);
+});
+
+document.getElementById('copyDeptBtn').addEventListener('click', () => {
+  const prompt = buildDeptPrompt();
+  if(!prompt) return;
+  navigator.clipboard.writeText(prompt).then(() => {
+    const btn = document.getElementById('copyDeptBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }).catch(() => {
+    alert('Clipboard blocked by your browser — use the Download .txt button instead.');
+  });
+});
+
+document.getElementById('downloadDeptBtn').addEventListener('click', () => {
+  const prompt = buildDeptPrompt();
+  if(!prompt) return;
+  const blob = new Blob([prompt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'department_contact_finder_prompt.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+deptRender();
+
+// ==================================================================
+// ---- Load a previously downloaded .txt prompt back into a section ----
+// Each section's parser reads the exact plain-text shape this tool
+// generates. Reliable on a prompt downloaded from this tool as-is;
+// heavily hand-edited text may not parse perfectly — review after loading.
+// ==================================================================
+
+function genericLoadParse(text, anchors, cutMarker){
+  const cutIdx = cutMarker ? text.indexOf(cutMarker) : -1;
+  const headerText = cutIdx >= 0 ? text.slice(0, cutIdx) : text;
+  const lines = headerText.split(/\r?\n/);
+  const data = {};
+  let field = null;
+  let buf = [];
+  function closeField(){
+    if(field){ data[field] = buf.join('\n').trim(); }
+    field = null; buf = [];
+  }
+  lines.forEach(line => {
+    let matched = null;
+    for(const a of anchors){
+      if(line.startsWith(a.prefix)){ matched = a; break; }
+    }
+    if(matched){
+      closeField();
+      const rest = line.slice(matched.prefix.length);
+      if(matched.key){ field = matched.key; buf = [rest]; }
+      else { field = null; buf = []; }
+      return;
+    }
+    if(field){ buf.push(line); return; }
+  });
+  closeField();
+  return data;
+}
+
+// ---- Section 2 (Bulk) loader ----
+const SECTION1_ANCHORS = [
+  { prefix: '- Company/companies I already know (use these as seeds for discovery, and include them in the output too): ', key: 'companies' },
+  { prefix: '- Industry / field (plain language): ', key: 'industry' },
+  { prefix: '- NAICS code(s) I already know: ', key: 'naics' },
+  { prefix: "- Exclude these companies entirely, even if they'd otherwise match: ", key: 'exclude' },
+  { prefix: '- Company size filter: ', key: 'companySizeRaw' },
+  { prefix: '- Location filter: ', key: 'locationRaw' },
+  { prefix: '- Target list size: ', key: 'bulkSizeRaw' },
+  { prefix: 'Discovery method — do NOT rely on NAICS codes as the search mechanism', key: null },
+];
+function parseSection1Prompt(text){
+  if(!text.includes('I want a fast, wide, low-detail list of candidate companies — NOT full research.')){
+    return { ok:false, reason: "Couldn't recognize this as a Bulk Company Pull prompt from this tool." };
+  }
+  const raw = genericLoadParse(text, SECTION1_ANCHORS, 'For each company, include only these columns');
+  const data = {
+    companies: raw.companies || '', industry: raw.industry || '', naics: raw.naics || '',
+    excludeCompanies: raw.exclude || '', companySize: '', zipCode: '', radiusMiles: '100',
+    bulkSize: '75-100',
+  };
+  if(raw.companySizeRaw){
+    const m = raw.companySizeRaw.match(/^only include companies matching "(.*)"/);
+    if(m) data.companySize = m[1];
+  }
+  if(raw.locationRaw){
+    const m = raw.locationRaw.match(/^only include companies headquartered within (.+?) miles of ZIP code (.+?), best effort/);
+    if(m){ data.radiusMiles = m[1]; data.zipCode = m[2]; }
+  }
+  if(raw.bulkSizeRaw){
+    const m = raw.bulkSizeRaw.match(/^(.*?) — go this wide since there's no per-company deep research cost here\./);
+    data.bulkSize = m ? m[1] : raw.bulkSizeRaw;
+  }
+  return { ok:true, data };
+}
+function populateShared(data){
+  if('companies' in data) document.getElementById('companies').value = data.companies;
+  if('industry' in data) document.getElementById('industry').value = data.industry;
+  if('naics' in data) document.getElementById('naics').value = data.naics;
+  if('excludeCompanies' in data) document.getElementById('excludeCompanies').value = data.excludeCompanies;
+  if('companySize' in data) document.getElementById('companySize').value = data.companySize;
+  if('zipCode' in data) document.getElementById('zipCode').value = data.zipCode;
+  if('radiusMiles' in data) document.getElementById('radiusMiles').value = data.radiusMiles || '100';
+}
+document.getElementById('loadBulkBtn').addEventListener('click', () => {
+  document.getElementById('loadBulkInput').click();
+});
+document.getElementById('loadBulkInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('loadBulkStatus');
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = parseSection1Prompt(reader.result);
+    if(!result.ok){
+      statusEl.textContent = result.reason + ' You can still paste its contents into the fields manually.';
+      return;
+    }
+    populateShared(result.data);
+    document.getElementById('bulkSize').value = result.data.bulkSize;
+    renderAll();
+    statusEl.textContent = `Loaded "${file.name}" — review the fields above, then regenerate.`;
+  };
+  reader.onerror = () => { statusEl.textContent = 'Could not read that file.'; };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---- Section 1 (Detailed) loader ----
+const SECTION2_ANCHORS = [
+  { prefix: '- Company/companies I know: ', key: 'companies' },
+  { prefix: '- Industry / field (plain language): ', key: 'industry' },
+  { prefix: '- NAICS code(s) I already know: ', key: 'naics' },
+  { prefix: '- Discovery scope: ', key: 'scopeRaw' },
+  { prefix: '- Roughly how many companies to find: ', key: 'perCodeRaw' },
+  { prefix: '- Include secondary/adjacent NAICS codes (suppliers, related industries): ', key: 'secondaryRaw' },
+  { prefix: "- Exclude these companies entirely, even if they'd otherwise match: ", key: 'exclude' },
+  { prefix: '- Discovery method — a NAICS code alone is too broad to use as a search filter', key: null },
+  { prefix: '- Two-tier list: use the discovery method above to build a candidate pool broader', key: 'tieredRaw' },
+  { prefix: '- What this list is for: ', key: 'purposeRaw' },
+  { prefix: '- Company size filter: ', key: 'companySizeRaw' },
+  { prefix: '- Location filter: ', key: 'locationFilterRaw' },
+  { prefix: '- Preferred location / work arrangement: ', key: 'location' },
+  { prefix: '- My background (use this to sharpen Suggested Job Title Keywords and Warm Introduction Path — look for former-employer overlap, transferable experience, or relevant credentials): ', key: 'background' },
+  { prefix: '- M&A research angle: ', key: 'maAngleRaw' },
+];
+function parseSection2Prompt(text){
+  if(!text.includes(`I want you to research target companies and build a formatted Excel tracker (.xlsx). Here's what I have:`)){
+    return { ok:false, reason: "Couldn't recognize this as a Detailed Company Pull prompt from this tool." };
+  }
+  const cutMarker = text.includes('For each Tier 1 company, research and include these columns in the tracker:')
+    ? 'For each Tier 1 company, research and include these columns in the tracker:'
+    : 'For each company, research and include these columns in the tracker:';
+  const raw = genericLoadParse(text, SECTION2_ANCHORS, cutMarker);
+
+  const data = {
+    companies: raw.companies || '', industry: raw.industry || '', naics: raw.naics || '',
+    excludeCompanies: raw.exclude || '', companySize: '', zipCode: '', radiusMiles: '100',
+    scope: 'find', perCode: '', secondary: 'yes',
+    tiered: 'no', tier1Size: '25', tier2Size: '75',
+    purpose: '', location: raw.location || '', background: raw.background || '',
+    formatting: text.includes('Formatting requirements for the Excel file — apply all of these:') ? 'yes' : 'no',
+    quickLinks: text.includes('Also add a "Job Posting Quick Links" tab') ? 'yes' : 'no',
+    jobFinder: text.includes('Also add a "Job Post Finder" tab') ? 'yes' : 'no',
+    outreachContacts: text.includes('Also add an "Outreach Contacts" tab') ? 'yes' : 'no',
+    events: text.includes('Also add an "Industry Events & Forums" tab') ? 'yes' : 'no',
+    eventsWindow: '12',
+    companyEvents: text.includes('Also add a "Company Activity & Events" tab') ? 'yes' : 'no',
+    companyEventsWindow: '90',
+    maEnabled: raw.maAngleRaw !== undefined ? 'yes' : 'no',
+    maAngle: 'target',
+  };
+  if(raw.scopeRaw){ data.scope = raw.scopeRaw.startsWith('Just research the exact companies') ? 'enrich' : 'find'; }
+  if(raw.perCodeRaw){ data.perCode = raw.perCodeRaw === 'your judgment' ? '' : raw.perCodeRaw; }
+  if(raw.secondaryRaw){ data.secondary = raw.secondaryRaw.trim() === 'Yes' ? 'yes' : 'no'; }
+  if(raw.tieredRaw !== undefined){
+    data.tiered = 'yes';
+    const m1 = raw.tieredRaw.match(/The top (.+?) companies become "Tier 1"/);
+    const m2 = raw.tieredRaw.match(/The next (.+?) companies become "Tier 2"/);
+    if(m1) data.tier1Size = m1[1];
+    if(m2) data.tier2Size = m2[1];
+  }
+  if(raw.purposeRaw !== undefined){
+    data.purpose = raw.purposeRaw === 'Not specified — use general judgment for fit/category/contacts.' ? '' : raw.purposeRaw;
+  }
+  if(raw.companySizeRaw){
+    const m = raw.companySizeRaw.match(/^only include companies matching "(.*)" — exclude companies outside this size band\./);
+    if(m) data.companySize = m[1];
+  }
+  if(raw.locationFilterRaw){
+    const m = raw.locationFilterRaw.match(/^only include companies headquartered within (.+?) miles of ZIP code (.+?)\. Estimate the distance/);
+    if(m){ data.radiusMiles = m[1]; data.zipCode = m[2]; }
+  }
+  if(raw.maAngleRaw){
+    if(raw.maAngleRaw.includes('Treat each company as a potential acquisition target for me.')) data.maAngle = 'target';
+    else if(raw.maAngleRaw.includes('Treat each company as a potential acquirer of a business like mine.')) data.maAngle = 'acquirer';
+    else if(raw.maAngleRaw.includes("Rate each company's fit both as a potential acquisition target AND as a potential acquirer.")) data.maAngle = 'either';
+  }
+  if(data.events === 'yes'){
+    const m = text.match(/relevant to my stated industry\/purpose, scoped to (.+?)\./);
+    if(m){
+      if(m[1] === 'the next 6 months') data.eventsWindow = '6';
+      else if(m[1] === 'any upcoming date (no cutoff)') data.eventsWindow = 'any';
+      else data.eventsWindow = '12';
+    }
+  }
+  if(data.companyEvents === 'yes'){
+    const m = text.match(/Recent LinkedIn Activity — notable posts, announcements, or updates from (.+?),/);
+    if(m){
+      if(m[1] === 'the last 30 days') data.companyEventsWindow = '30';
+      else if(m[1] === 'the last 6 months') data.companyEventsWindow = '180';
+      else data.companyEventsWindow = '90';
+    }
+  }
+  return { ok:true, data };
+}
+function populateSection2(data){
+  populateShared(data);
+  document.querySelector(`input[name="scope"][value="${data.scope}"]`).checked = true;
+  document.getElementById('perCode').value = data.perCode;
+  document.querySelector(`input[name="secondary"][value="${data.secondary}"]`).checked = true;
+  document.querySelector(`input[name="tiered"][value="${data.tiered}"]`).checked = true;
+  document.getElementById('tier1Size').value = data.tier1Size;
+  document.getElementById('tier2Size').value = data.tier2Size;
+  document.getElementById('purpose').value = data.purpose;
+  document.getElementById('location').value = data.location;
+  document.getElementById('background').value = data.background;
+  document.querySelector(`input[name="formatting"][value="${data.formatting}"]`).checked = true;
+  document.querySelector(`input[name="quickLinks"][value="${data.quickLinks}"]`).checked = true;
+  document.querySelector(`input[name="jobFinder"][value="${data.jobFinder}"]`).checked = true;
+  document.querySelector(`input[name="outreachContacts"][value="${data.outreachContacts}"]`).checked = true;
+  document.querySelector(`input[name="events"][value="${data.events}"]`).checked = true;
+  document.querySelector(`input[name="eventsWindow"][value="${data.eventsWindow}"]`).checked = true;
+  document.querySelector(`input[name="companyEvents"][value="${data.companyEvents}"]`).checked = true;
+  document.querySelector(`input[name="companyEventsWindow"][value="${data.companyEventsWindow}"]`).checked = true;
+  document.querySelector(`input[name="maEnabled"][value="${data.maEnabled}"]`).checked = true;
+  document.querySelector(`input[name="maAngle"][value="${data.maAngle}"]`).checked = true;
+  toggleMaAngleField();
+  toggleScopeFields();
+  renderAll();
+}
+document.getElementById('loadMainBtn').addEventListener('click', () => {
+  document.getElementById('loadMainInput').click();
+});
+document.getElementById('loadMainInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('loadMainStatus');
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = parseSection2Prompt(reader.result);
+    if(!result.ok){
+      statusEl.textContent = result.reason + ' You can still paste its contents into the fields manually.';
+      return;
+    }
+    populateSection2(result.data);
+    statusEl.textContent = `Loaded "${file.name}" — review the fields above, then regenerate.`;
+  };
+  reader.onerror = () => { statusEl.textContent = 'Could not read that file.'; };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---- Section 3 loader ----
+function parseSection3Prompt(text){
+  if(!text.includes('Cross-reference my attached LinkedIn contacts CSV against this list of target companies')){
+    return { ok:false, reason: "Couldn't recognize this as a LinkedIn Contact Enrichment prompt from this tool." };
+  }
+  const marker = 'to help me find warm introduction paths:';
+  const idx = text.indexOf(marker);
+  const after = idx >= 0 ? text.slice(idx + marker.length) : text;
+  const lines = after.split(/\r?\n/);
+  const companies = [];
+  let started = false;
+  for(const line of lines){
+    if(line.startsWith('- ')){ companies.push(line.slice(2).trim()); started = true; continue; }
+    if(started && line.trim() === '') break;
+    if(started && !line.startsWith('- ')) break;
+  }
+  return { ok:true, data: { enrichCompanies: companies.join('\n') } };
+}
+document.getElementById('loadEnrichBtn').addEventListener('click', () => {
+  document.getElementById('loadEnrichInput').click();
+});
+document.getElementById('loadEnrichInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('loadEnrichStatus');
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = parseSection3Prompt(reader.result);
+    if(!result.ok){
+      statusEl.textContent = result.reason + ' You can still paste its contents into the field manually.';
+      return;
+    }
+    document.getElementById('enrichCompanies').value = result.data.enrichCompanies;
+    enrichRender();
+    statusEl.textContent = `Loaded "${file.name}" — review the companies above, then regenerate.`;
+  };
+  reader.onerror = () => { statusEl.textContent = 'Could not read that file.'; };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---- Section 4 loader ----
+function parseSection4Prompt(text){
+  if(!text.includes("I'm researching named individuals at specific companies who work in or near a target department/role")){
+    return { ok:false, reason: "Couldn't recognize this as a Department Contact Finder prompt from this tool." };
+  }
+  const data = { deptCompanies: '', deptRole: '', deptAdjacent: 'yes' };
+  const roleM = text.match(/^Target role\/department: (.*)$/m);
+  if(roleM) data.deptRole = roleM[1].trim();
+  const adjM = text.match(/^Include adjacent teams: (.*)$/m);
+  if(adjM) data.deptAdjacent = adjM[1].trim() === 'No' ? 'no' : 'yes';
+
+  const marker = 'Target companies (one per line):';
+  const idx = text.indexOf(marker);
+  if(idx >= 0){
+    const after = text.slice(idx + marker.length).split(/\r?\n/);
+    const companies = [];
+    let started = false;
+    for(const line of after){
+      if(line.startsWith('- ')){ companies.push(line.slice(2).trim()); started = true; continue; }
+      if(started && (line.trim() === '' || !line.startsWith('- '))) break;
+    }
+    data.deptCompanies = companies.join('\n');
+  }
+  return { ok:true, data };
+}
+document.getElementById('loadDeptBtn').addEventListener('click', () => {
+  document.getElementById('loadDeptInput').click();
+});
+document.getElementById('loadDeptInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('loadDeptStatus');
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result = parseSection4Prompt(reader.result);
+    if(!result.ok){
+      statusEl.textContent = result.reason + ' You can still paste its contents into the fields manually.';
+      return;
+    }
+    document.getElementById('deptCompanies').value = result.data.deptCompanies;
+    document.getElementById('deptRole').value = result.data.deptRole;
+    document.querySelector(`input[name="deptAdjacent"][value="${result.data.deptAdjacent}"]`).checked = true;
+    deptRender();
+    statusEl.textContent = `Loaded "${file.name}" — review the fields above, then regenerate.`;
+  };
+  reader.onerror = () => { statusEl.textContent = 'Could not read that file.'; };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+</script>
+</body>
+</html>
