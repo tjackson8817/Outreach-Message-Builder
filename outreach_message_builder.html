@@ -127,6 +127,10 @@
   .banner b{color:#3d3113;}
   .paired-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap;}
   .paired-row input{flex:1;min-width:120px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;}
+  .paired-row select{flex:1;min-width:160px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;color:#1a2a33;background:#fff;cursor:pointer;}
+  .paired-row{border:1px solid var(--border);border-radius:7px;padding:8px;background:#fff;}
+  .paired-row .row-line{display:flex;gap:6px;flex-basis:100%;flex-wrap:wrap;align-items:center;}
+  .paired-row .mini{font-size:11px;color:var(--muted);flex-basis:100%;margin:2px 0 -2px;}
   .paired-row button{background:#fbeaea;color:#b23b3b;border:none;border-radius:5px;padding:6px 10px;cursor:pointer;font-size:13px;flex:0 0 auto;}
 </style>
 </head>
@@ -150,7 +154,7 @@
         <div class="field">
           <label>Bulk paste — Company, Contact Name, Title</label>
           <textarea id="bulkPaste" placeholder="Copy 3 columns in this order: Company, Contact Name, Title — e.g. columns A–C of the Outreach Msg tab. Paste here, one contact per line."></textarea>
-          <p class="hint">Expects three tab-separated columns, in this order: Company, then Contact Name, then Title — exactly what you get by copying columns A–C of the <strong>Outreach Msg</strong> tab from a LinkedIn Contact Enrichment or Department Contact Finder workbook. Every row needs its own company name. A header row, if included, is skipped automatically. After parsing, you can add a Warm Introduction Path and Target Audience per row.</p>
+          <p class="hint">Expects three tab-separated columns, in this order: Company, then Contact Name, then Title — exactly what you get by copying columns A–C of the <strong>Outreach Msg</strong> tab from a LinkedIn Contact Enrichment or Department Contact Finder workbook. Every row needs its own company name. A header row, if included, is skipped automatically. After parsing, each row gets two dropdowns: how you know them (Warm Introduction Path) and who they are (Target Audience). Message goal, channel, and tone in section 2 can be set before or after pasting — your rows are kept either way.</p>
           <button class="btn-secondary" id="parseBulkBtn" type="button" style="margin-top:8px;">Parse rows</button>
         </div>
         <div class="field" id="pairedPreviewField" style="display:none;">
@@ -263,7 +267,7 @@ function parseBulkPaste(){
 }
 
 const AUDIENCE_OPTIONS = [
-  { value: '', label: '(auto-detect from Warm Introduction Path)' },
+  { value: '', label: 'Audience: auto-detect' },
   { value: 'recruiter', label: 'Recruiter' },
   { value: 'hiring_manager', label: 'Hiring Manager' },
   { value: 'cold', label: 'Cold Outreach' },
@@ -286,6 +290,22 @@ function contextFieldMeta(goal){
   return null; // 'first' goal: no context field shown
 }
 
+const WARM_INTRO_OPTIONS = [
+  { value: '', label: 'Choose connection type…' },
+  { value: 'Direct — former employer / former colleagues there', label: 'Direct — former employer / colleague' },
+  { value: 'Direct — current or recent employer, internal network', label: 'Direct — current / recent employer' },
+  { value: 'Existing LinkedIn connection (no close working history)', label: 'Existing LinkedIn connection' },
+  { value: 'Referral — introduced by a mutual contact', label: 'Referral from a mutual contact' },
+  { value: 'Met at a conference / industry event', label: 'Met at a conference / event' },
+  { value: 'No direct connection — sourced through a recruiter / executive search firm', label: 'Via recruiter / executive search firm' },
+  { value: 'No direct connection — hands-on familiarity with their platform / products', label: 'Platform / product familiarity' },
+  { value: 'No connection — cold outreach', label: 'No connection — cold' },
+  { value: '__other__', label: 'Other (type my own)…' },
+];
+const WARM_PRESET_VALUES = WARM_INTRO_OPTIONS.map(o => o.value).filter(v => v && v !== '__other__');
+
+function esc(v){ return String(v||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
 function renderPairedPreview(){
   const container = document.getElementById('pairedPreview');
   const field = document.getElementById('pairedPreviewField');
@@ -298,29 +318,38 @@ function renderPairedPreview(){
   container.innerHTML = '';
   const goal = radioVal('goal');
   const ctxMeta = contextFieldMeta(goal);
-  if(ctxMeta){
-    const label = document.createElement('p');
-    label.className = 'hint';
-    label.style.marginTop = '0';
-    label.textContent = ctxMeta.label;
-    container.appendChild(label);
-  }
   pairedRows.forEach((row, idx) => {
     const div = document.createElement('div');
     div.className = 'paired-row';
+    const wi = row.warmIntro || '';
+    const isPreset = WARM_PRESET_VALUES.includes(wi);
+    const isOther = row.warmOther || (wi && !isPreset);
+    const warmSel = isOther ? '__other__' : wi;
+    const warmOptionsHtml = WARM_INTRO_OPTIONS.map(opt =>
+      `<option value="${esc(opt.value)}" ${warmSel === opt.value ? 'selected' : ''}>${esc(opt.label)}</option>`
+    ).join('');
     const audienceOptionsHtml = AUDIENCE_OPTIONS.map(opt =>
       `<option value="${opt.value}" ${row.audience === opt.value ? 'selected' : ''}>${opt.label}</option>`
     ).join('');
+    const otherHtml = isOther
+      ? `<input type="text" data-idx="${idx}" data-field="warmIntro" value="${esc(wi)}" placeholder="Describe the connection, e.g. 'Worked with their CISO at Accenture 2019-2021'" style="flex-basis:100%;margin-top:4px;">`
+      : '';
     const contextInputHtml = ctxMeta
-      ? `<input type="text" data-idx="${idx}" data-field="contextNotes" value="${(row.contextNotes||'').replace(/"/g,'&quot;')}" placeholder="${ctxMeta.placeholder.replace(/"/g,'&quot;')}" style="flex-basis:100%;margin-top:4px;">`
+      ? `<span class="mini">${esc(ctxMeta.label)}</span><input type="text" data-idx="${idx}" data-field="contextNotes" value="${esc(row.contextNotes)}" placeholder="${esc(ctxMeta.placeholder)}" style="flex-basis:100%;">`
       : '';
     div.innerHTML = `
-      <input type="text" data-idx="${idx}" data-field="company" value="${row.company.replace(/"/g,'&quot;')}" placeholder="Company">
-      <input type="text" data-idx="${idx}" data-field="name" value="${(row.name||'').replace(/"/g,'&quot;')}" placeholder="Contact Name">
-      <input type="text" data-idx="${idx}" data-field="title" value="${(row.title||'').replace(/"/g,'&quot;')}" placeholder="Title">
-      <input type="text" data-idx="${idx}" data-field="warmIntro" value="${row.warmIntro.replace(/"/g,'&quot;')}" placeholder="Warm Introduction Path">
-      <select data-idx="${idx}" data-field="audience" style="flex:1.3;min-width:150px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);border-radius:5px;">${audienceOptionsHtml}</select>
-      <button type="button" data-remove="${idx}">\u00d7</button>
+      <div class="row-line">
+        <input type="text" data-idx="${idx}" data-field="company" value="${esc(row.company)}" placeholder="Company">
+        <input type="text" data-idx="${idx}" data-field="name" value="${esc(row.name)}" placeholder="Contact Name">
+        <input type="text" data-idx="${idx}" data-field="title" value="${esc(row.title)}" placeholder="Title">
+        <button type="button" data-remove="${idx}" title="Remove this row">\u00d7</button>
+      </div>
+      <span class="mini">How you know them &nbsp;/&nbsp; Who they are</span>
+      <div class="row-line">
+        <select data-idx="${idx}" data-field="warmSelect" aria-label="Warm Introduction Path">${warmOptionsHtml}</select>
+        <select data-idx="${idx}" data-field="audience" aria-label="Target Audience">${audienceOptionsHtml}</select>
+      </div>
+      ${otherHtml}
       ${contextInputHtml}
     `;
     container.appendChild(div);
@@ -328,22 +357,35 @@ function renderPairedPreview(){
   container.querySelectorAll('input').forEach(el => {
     el.addEventListener('input', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      const field = e.target.dataset.field;
-      pairedRows[idx][field] = e.target.value;
+      pairedRows[idx][e.target.dataset.field] = e.target.value;
       render();
     });
   });
   container.querySelectorAll('select').forEach(el => {
     el.addEventListener('change', (e) => {
       const idx = parseInt(e.target.dataset.idx);
-      const field = e.target.dataset.field;
-      pairedRows[idx][field] = e.target.value;
+      const f = e.target.dataset.field;
+      if(f === 'warmSelect'){
+        if(e.target.value === '__other__'){
+          pairedRows[idx].warmOther = true;
+          if(WARM_PRESET_VALUES.includes(pairedRows[idx].warmIntro)) pairedRows[idx].warmIntro = '';
+          renderPairedPreview();
+          const box = container.querySelector(`input[data-idx="${idx}"][data-field="warmIntro"]`);
+          if(box) box.focus();
+        } else {
+          pairedRows[idx].warmOther = false;
+          pairedRows[idx].warmIntro = e.target.value;
+          renderPairedPreview();
+        }
+      } else {
+        pairedRows[idx][f] = e.target.value;
+      }
       render();
     });
   });
   container.querySelectorAll('button[data-remove]').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const idx = parseInt(e.target.dataset.remove);
+      const idx = parseInt(e.currentTarget.dataset.remove);
       pairedRows.splice(idx, 1);
       renderPairedPreview();
       render();
@@ -355,6 +397,7 @@ document.getElementById('parseBulkBtn').addEventListener('click', parseBulkPaste
 document.getElementById('addPairBtn').addEventListener('click', () => {
   pairedRows.push({ company: '', name: '', title: '', warmIntro: '', audience: '', contextNotes: '' });
   renderPairedPreview();
+  render();
 });
 
 function audienceLabel(v){
